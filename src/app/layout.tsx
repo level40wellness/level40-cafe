@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Fraunces, Inter, Jost } from "next/font/google";
 
+import { Toaster } from "sonner";
+
 import "./globals.css";
+import { CartDrawer } from "@/components/cart-drawer";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -84,6 +87,8 @@ export default function RootLayout({
             <SiteHeader />
             <main>{children}</main>
             <SiteFooter />
+            <CartDrawer />
+            <Toaster position="bottom-right" richColors />
           </CartProvider>
         </ThemeProvider>
       </body>

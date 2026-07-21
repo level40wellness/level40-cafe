@@ -115,8 +115,15 @@ export async function getShopCategories() {
  * Returns null rather than throwing for a missing or inactive product, so
  * callers can render notFound(). An inactive product must 404 for the public,
  * not merely render empty.
+ *
+ * `kind` scopes the lookup to one side of the catalog. /shop/[id] passes
+ * "retail" so a café dish does not resolve to a shop product page complete
+ * with delivery and exchange terms that make no sense for a plate of food.
  */
-export async function getProductById(id: string): Promise<ProductSummary | null> {
+export async function getProductById(
+  id: string,
+  kind?: "cafe" | "retail",
+): Promise<ProductSummary | null> {
   const row = await db.query.products.findFirst({
     where: eq(products.id, id),
     with: {
@@ -126,17 +133,24 @@ export async function getProductById(id: string): Promise<ProductSummary | null>
   });
 
   if (!row || !row.active) return null;
+  if (!row.category?.active) return null;
+  if (kind && row.category.kind !== kind) return null;
 
   return toSummary(row as ProductRow);
 }
 
 /** Ids only, for generating the sitemap and static params. */
-export async function getActiveProductIds() {
-  const rows = await db
-    .select({ id: products.id })
-    .from(products)
-    .where(eq(products.active, true));
+export async function getActiveProductIds(kind?: "cafe" | "retail") {
+  if (!kind) {
+    const rows = await db
+      .select({ id: products.id })
+      .from(products)
+      .where(eq(products.active, true));
 
+    return rows.map((row) => row.id);
+  }
+
+  const rows = await getProductsByKind(kind);
   return rows.map((row) => row.id);
 }
 

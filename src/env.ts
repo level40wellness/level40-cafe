@@ -5,13 +5,31 @@ import { z } from "zod";
  * Validated at module load so a missing or malformed variable fails the build
  * rather than surfacing as a runtime error on a customer's first request.
  *
- * Each migration phase adds only the variables it actually uses — auth secrets
- * in Phase 1, payment provider in Phase 3, blob token in Phase 4.
+ * Each migration phase adds only the variables it actually uses — payment
+ * provider in Phase 3, blob token in Phase 4.
  */
-const envSchema = z.object({
-  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  DATABASE_URL: z.url(),
-});
+const envSchema = z
+  .object({
+    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+    DATABASE_URL: z.url(),
+    // 32 bytes of entropy. Production must use a different value to development,
+    // set in the Vercel dashboard rather than committed anywhere.
+    BETTER_AUTH_SECRET: z.string().min(32),
+    BETTER_AUTH_URL: z.url(),
+    // Optional so the app runs before the Google Cloud project exists. Google
+    // sign-in is simply hidden until both are present.
+    GOOGLE_CLIENT_ID: z.string().min(1).optional(),
+    GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
+  })
+  .refine(
+    (value) => !!value.GOOGLE_CLIENT_ID === !!value.GOOGLE_CLIENT_SECRET,
+    // Half-configured OAuth fails at the redirect with an opaque Google error.
+    // Better to refuse to boot.
+    {
+      error: "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set together",
+      path: ["GOOGLE_CLIENT_ID"],
+    },
+  );
 
 const parsed = envSchema.safeParse(process.env);
 

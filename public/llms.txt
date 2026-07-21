@@ -1,0 +1,20 @@
+# Level 40
+
+> Modern Dubai café offering chef-driven Arabian cuisine, weekly and monthly meal plans, à la carte QR ordering, and a curated yoga & wellness shop — one home for a healthier life in Dubai.
+
+## Pages
+
+- [Home](/): Overview of Level 40 — food, meal plans and wellness.
+- [About](/about): Story, values and the team behind Level 40.
+- [Menu & Order](/menu): Browse the full menu and place dine-in, pickup or table QR orders.
+- [Shop](/shop): Yoga mats, accessories, activewear and wellness essentials.
+- [Meal Plans](/subscription): Weekly and monthly chef-curated meal subscriptions delivered across Dubai.
+- [Services](/services): Ways to enjoy Level 40 — dine-in, pickup, events and more.
+- [Journal](/blog): Recipes, kitchen notes and stories from Level 40.
+- [Gallery](/gallery): Photos of the room, plates and people.
+- [Contact](/contact): Address, hours, phone and map for the JVC café.
+
+## Legal
+
+- [Privacy Policy](/privacy): How we handle personal information.
+- [Terms of Service](/terms): The terms on which we provide this site.

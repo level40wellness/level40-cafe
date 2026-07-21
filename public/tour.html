@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Virtual Tour — Level 40 Café Dubai</title>
+<meta name="description" content="Step inside Level 40 — an immersive 360° tour of our Dubai café, bar and studio." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --espresso:#2C1E14;--cocoa:#7A5A43;--olive:#8B9A5B;--terracotta:#C4856A;
+  --honey:#D4A843;--gold:#D4A843;--gold-soft:#E4C97E;--cream:#F7F2E8;--stone:#D8D5C8;
+  --display:'Fraunces',Georgia,serif;--serif:'Cormorant Garamond',Georgia,serif;--sans:'Jost',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#000;font-family:var(--sans);color:var(--cream)}
+#viewer{position:fixed;inset:0;cursor:grab;touch-action:none}
+#viewer:active{cursor:grabbing}
+canvas{display:block}
+
+/* Top bar */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:1.3rem 1.8rem;background:linear-gradient(180deg,rgba(28,18,12,.75),transparent);pointer-events:none}
+.topbar>*{pointer-events:auto}
+.tb-logo{font-family:var(--display);font-size:1.5rem;color:var(--cream);font-weight:500;letter-spacing:.02em;display:flex;flex-direction:column;line-height:1}
+.tb-logo small{font-family:var(--sans);font-size:.48rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-top:.3rem}
+.tb-exit{display:inline-flex;align-items:center;gap:.5rem;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cream);border:1px solid rgba(212,168,67,.5);padding:.6rem 1.1rem;border-radius:100px;text-decoration:none;background:rgba(28,18,12,.35);backdrop-filter:blur(6px);transition:.3s}
+.tb-exit:hover{background:var(--gold);color:var(--espresso);border-color:var(--gold)}
+
+/* Room label */
+.room-label{position:fixed;top:5.2rem;left:1.8rem;z-index:15;pointer-events:none;text-shadow:0 2px 20px rgba(0,0,0,.6)}
+.room-label .eyebrow{font-size:.62rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold-soft);display:block;margin-bottom:.4rem}
+.room-label h1{font-family:var(--display);font-size:clamp(1.8rem,4vw,2.8rem);font-weight:300;color:var(--cream);line-height:1}
+.room-label p{font-family:var(--serif);font-style:italic;font-size:1.05rem;color:#e2d6c2;margin-top:.4rem;max-width:22rem}
+
+/* Hotspots */
+.hotspot{position:fixed;z-index:12;width:44px;height:44px;margin:-22px 0 0 -22px;cursor:pointer;transition:opacity .3s}
+.hotspot .ring{position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--gold-soft);animation:pulse 2.4s ease-out infinite}
+.hotspot .dot{position:absolute;inset:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 16px rgba(212,168,67,.9);display:grid;place-items:center;color:var(--espresso);font-size:.8rem;font-weight:700}
+.hotspot.nav .dot::after{content:'→'}
+.hotspot.info .dot::after{content:'i';font-family:var(--serif);font-style:italic}
+.hotspot .tip{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);white-space:nowrap;background:rgba(28,18,12,.9);color:var(--cream);font-size:.72rem;letter-spacing:.08em;padding:.5rem .85rem;border-radius:8px;border:1px solid rgba(212,168,67,.4);opacity:0;transition:.25s;pointer-events:none}
+.hotspot:hover .tip{opacity:1}
+@keyframes pulse{0%{transform:scale(.7);opacity:.9}100%{transform:scale(2.1);opacity:0}}
+
+/* Bottom rooms nav */
+.rooms{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:.7rem;padding:.7rem;background:rgba(28,18,12,.55);backdrop-filter:blur(10px);border:1px solid rgba(212,168,67,.28);border-radius:100px}
+.room-btn{position:relative;width:64px;height:44px;border-radius:26px;overflow:hidden;cursor:pointer;border:1.5px solid transparent;transition:.3s;background-size:cover;background-position:center;filter:saturate(.9) brightness(.75)}
+.room-btn:hover{filter:saturate(1) brightness(.95)}
+.room-btn.active{border-color:var(--gold);filter:saturate(1.05) brightness(1);width:96px}
+.room-btn span{position:absolute;inset:0;display:grid;place-items:center;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-shadow:0 1px 4px #000;opacity:0;transition:.3s}
+.room-btn.active span{opacity:1}
+
+/* Controls */
+.controls{position:fixed;right:1.8rem;bottom:1.6rem;z-index:20;display:flex;flex-direction:column;gap:.6rem}
+.ctrl{width:44px;height:44px;border-radius:50%;border:1px solid rgba(212,168,67,.4);background:rgba(28,18,12,.5);backdrop-filter:blur(8px);color:var(--cream);cursor:pointer;display:grid;place-items:center;transition:.3s;font-size:1rem}
+.ctrl:hover{background:var(--gold);color:var(--espresso);border-color:var(--gold)}
+.ctrl.on{background:var(--gold);color:var(--espresso)}
+.hint{position:fixed;bottom:5.6rem;left:50%;transform:translateX(-50%);z-index:14;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(247,242,232,.7);pointer-events:none;transition:opacity .6s}
+
+/* Info modal */
+.modal-bg{position:fixed;inset:0;z-index:40;background:rgba(20,13,8,.6);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:.35s;display:grid;place-items:center;padding:1.5rem}
+.modal-bg.open{opacity:1;visibility:visible}
+.modal{background:var(--cream);color:var(--espresso);max-width:440px;width:100%;border-radius:20px;overflow:hidden;transform:translateY(18px);transition:.4s}
+.modal-bg.open .modal{transform:none}
+.modal .mimg{height:200px;background:var(--stone) center/cover no-repeat}
+.modal .mbody{padding:2rem 2rem 2.2rem}
+.modal .eyebrow{font-size:.62rem;letter-spacing:.32em;text-transform:uppercase;color:var(--terracotta);font-weight:600}
+.modal h3{font-family:var(--display);font-size:1.7rem;font-weight:400;margin:.6rem 0 .7rem}
+.modal p{font-weight:300;color:#5c4d40;line-height:1.7}
+.modal .mclose{margin-top:1.6rem;display:inline-flex;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cocoa);border:1px solid var(--cocoa);padding:.7rem 1.3rem;border-radius:100px;cursor:pointer;transition:.3s}
+.modal .mclose:hover{background:var(--espresso);color:var(--cream);border-color:var(--espresso)}
+
+/* Intro overlay */
+.intro{position:fixed;inset:0;z-index:60;background:#20130c center/cover no-repeat;display:flex;align-items:center;justify-content:center;text-align:center;transition:opacity .8s,visibility .8s}
+.intro::after{content:'';position:absolute;inset:0;background:rgba(20,13,8,.55)}
+.intro.hide{opacity:0;visibility:hidden}
+.intro .in{position:relative;z-index:2;max-width:34rem;padding:2rem}
+.intro .eyebrow{font-size:.66rem;letter-spacing:.42em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:1.2rem}
+.intro h1{font-family:var(--display);font-size:clamp(2.6rem,7vw,4.4rem);font-weight:300;line-height:1.05;margin-bottom:1.2rem}
+.intro h1 em{font-family:var(--serif);font-style:italic;color:var(--gold-soft)}
+.intro p{font-family:var(--serif);font-style:italic;font-size:1.25rem;color:#e2d6c2;margin-bottom:2.4rem}
+.enter-btn{display:inline-flex;align-items:center;gap:.7rem;font-size:.8rem;letter-spacing:.24em;text-transform:uppercase;font-weight:500;color:var(--espresso);background:linear-gradient(100deg,var(--honey),#c79231);padding:1.15rem 2.6rem;border-radius:100px;border:none;cursor:pointer;transition:.35s;box-shadow:0 18px 40px -16px rgba(212,168,67,.9)}
+.enter-btn:hover{transform:translateY(-3px)}
+.loading{position:fixed;inset:0;z-index:55;background:#20130c;display:grid;place-items:center;transition:opacity .6s}
+.loading.hide{opacity:0;pointer-events:none}
+.loading .spin{width:44px;height:44px;border:2px solid rgba(212,168,67,.25);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:640px){.room-label{top:4.6rem}.controls{bottom:5.4rem}}
+</style>
+</head>
+<body>
+
+<div id="viewer"></div>
+
+<div class="topbar">
+  <a href="index.html" class="tb-logo">level 40<small>Virtual Tour</small></a>
+  <a href="index.html" class="tb-exit">✕ Exit tour</a>
+</div>
+
+<div class="room-label" id="roomLabel">
+  <span class="eyebrow">Now viewing</span>
+  <h1 id="roomName">The Dining Room</h1>
+  <p id="roomDesc">Deep banquettes, brass light and the perfume of cardamom.</p>
+</div>
+
+<div class="hint" id="hint">Drag to look around · click the glowing points</div>
+
+<div class="controls">
+  <button class="ctrl on" id="autoBtn" title="Auto-rotate">↻</button>
+  <button class="ctrl" id="zoomIn" title="Zoom in">+</button>
+  <button class="ctrl" id="zoomOut" title="Zoom out">−</button>
+  <button class="ctrl" id="fsBtn" title="Fullscreen">⛶</button>
+</div>
+
+<div class="rooms" id="rooms"></div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="mimg" id="modalImg"></div>
+    <div class="mbody">
+      <span class="eyebrow" id="modalTag">Detail</span>
+      <h3 id="modalTitle"></h3>
+      <p id="modalText"></p>
+      <div class="mclose" id="modalClose">Close</div>
+    </div>
+  </div>
+</div>
+
+<div class="intro" id="intro" style="background-image:url('https://level40.lovable.app/assets/interior-RaKjzihD.jpg')">
+  <div class="in">
+    <span class="eyebrow">Level 40 · Downtown Dubai</span>
+    <h1>Step <em>inside.</em></h1>
+    <p>A 360° wander through our dining room, bar and studio — before you ever arrive.</p>
+    <button class="enter-btn" id="enterBtn">Begin the tour →</button>
+  </div>
+</div>
+
+<div class="loading hide" id="loading"><div class="spin"></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const IMG='https://level40.lovable.app/assets/';
+const FALLBACK='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=2100&q=80';
+
+// Scene data — each "room" is a panorama with hotspots (lon/lat in degrees)
+const SCENES=[
+  { key:'dining', name:'The Dining Room', desc:'Deep banquettes, brass light and the perfume of cardamom.',
+    img:IMG+'interior-RaKjzihD.jpg',
+    hotspots:[
+      {type:'nav', lon:70,  lat:-2, to:'table',  label:'To the chef\'s table'},
+      {type:'info',lon:-60, lat:4,  label:'Brass & marble', title:'Hand-poured brass',
+        text:'Every light in the room is hand-poured brass, warmed to a candle-soft glow. The tabletops are single slabs of Rosso Levanto marble.', mimg:IMG+'interior-RaKjzihD.jpg'},
+      {type:'info',lon:150, lat:-6, label:'The banquettes', title:'Emerald velvet',
+        text:'Our deep emerald banquettes were made to be lingered in — sink in for a coffee, stay for the evening.', mimg:IMG+'hero-table-7y9Z4FV8.jpg'}
+    ]},
+  { key:'table', name:'The Chef\'s Table', desc:'A front-row seat to saffron, smoke and slow fire.',
+    img:IMG+'hero-table-7y9Z4FV8.jpg',
+    hotspots:[
+      {type:'nav', lon:-80, lat:-2, to:'dining', label:'Back to dining'},
+      {type:'nav', lon:90,  lat:0,  to:'pass',   label:'To the kitchen pass'},
+      {type:'info',lon:10,  lat:-8, label:'Signature dish', title:'Saffron Lamb Skewers',
+        text:'Charcoal-grilled lamb over saffron-pomegranate rice with mint yoghurt — the dish that put Level 40 on the map.', mimg:IMG+'sig-1-BWaiG0yX.jpg'}
+    ]},
+  { key:'pass', name:'The Kitchen Pass', desc:'Where seasonal Arabian classics are plated by hand.',
+    img:IMG+'chef-plating-DtnaSVn5.jpg',
+    hotspots:[
+      {type:'nav', lon:-70, lat:0,  to:'table',  label:'Back to the table'},
+      {type:'nav', lon:120, lat:-2, to:'lounge', label:'To the lounge'},
+      {type:'info',lon:20,  lat:6,  label:'Plated fresh', title:'Crafted to order',
+        text:'Nothing sits under a lamp. Each plate is finished the moment before it travels the few steps to your table.', mimg:IMG+'chef-plating-DtnaSVn5.jpg'}
+    ]},
+  { key:'lounge', name:'The Lounge', desc:'A quiet escape from the boulevard — greenery, warmth, calm.',
+    img:FALLBACK,
+    hotspots:[
+      {type:'nav', lon:-90, lat:0, to:'pass',   label:'Back to the pass'},
+      {type:'nav', lon:120, lat:0, to:'dining', label:'Return to dining'},
+      {type:'info',lon:20,  lat:-4,label:'Wellness shop', title:'Shop the practice',
+        text:'Mats, props and rituals chosen with the same care we put on the plate — the Level 40 table, extended into your day.', mimg:IMG+'mat-balanced-C5p35soK.jpg'}
+    ]}
+];
+
+let renderer,scene,camera,mesh,texLoader;
+let lon=0,lat=0,phi=0,theta=0,fov=72;
+let isDown=false,downX=0,downY=0,dLon=0,dLat=0,moved=false;
+let autoRotate=true,current=null;
+const viewer=document.getElementById('viewer');
+const hotspotEls=[];
+
+function init(){
+  scene=new THREE.Scene();
+  camera=new THREE.PerspectiveCamera(fov,innerWidth/innerHeight,1,1100);
+  renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(innerWidth,innerHeight);
+  viewer.appendChild(renderer.domElement);
+  texLoader=new THREE.TextureLoader();
+  texLoader.crossOrigin='anonymous';
+  const geo=new THREE.SphereGeometry(500,60,40);
+  geo.scale(-1,1,1);
+  mesh=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0x241812}));
+  scene.add(mesh);
+  buildRoomsNav();
+  addEvents();
+  animate();
+}
+
+function loadScene(key,startLon){
+  const s=SCENES.find(x=>x.key===key); if(!s)return;
+  current=s;
+  document.getElementById('loading').classList.remove('hide');
+  const done=(tex)=>{
+    mesh.material.map=tex; mesh.material.color.set(0xffffff); mesh.material.needsUpdate=true;
+    document.getElementById('loading').classList.add('hide');
+  };
+  texLoader.load(s.img,done,undefined,()=>{ texLoader.load(FALLBACK,done,undefined,()=>document.getElementById('loading').classList.add('hide')); });
+  if(startLon!==undefined){lon=startLon;} lat=0;
+  document.getElementById('roomName').textContent=s.name;
+  document.getElementById('roomDesc').textContent=s.desc;
+  buildHotspots(s);
+  document.querySelectorAll('.room-btn').forEach(b=>b.classList.toggle('active',b.dataset.key===key));
+}
+
+function buildRoomsNav(){
+  const wrap=document.getElementById('rooms');
+  wrap.innerHTML=SCENES.map(s=>`<div class="room-btn" data-key="${s.key}" style="background-image:url('${s.img}')"><span>${s.name.replace('The ','')}</span></div>`).join('');
+  wrap.querySelectorAll('.room-btn').forEach(b=>b.addEventListener('click',()=>loadScene(b.dataset.key)));
+}
+
+function buildHotspots(s){
+  hotspotEls.forEach(h=>h.el.remove()); hotspotEls.length=0;
+  s.hotspots.forEach(h=>{
+    const el=document.createElement('div');
+    el.className='hotspot '+h.type;
+    el.innerHTML=`<div class="ring"></div><div class="dot"></div><div class="tip">${h.label}</div>`;
+    el.addEventListener('click',ev=>{ ev.stopPropagation();
+      if(h.type==='nav') loadScene(h.to, h.lon+180);
+      else openModal(h);
+    });
+    document.body.appendChild(el);
+    hotspotEls.push({el,data:h});
+  });
+}
+
+function dirFromLonLat(lg,lt,r){
+  const p=THREE.MathUtils.degToRad(90-lt), t=THREE.MathUtils.degToRad(lg);
+  return new THREE.Vector3(r*Math.sin(p)*Math.cos(t), r*Math.cos(p), r*Math.sin(p)*Math.sin(t));
+}
+
+function updateHotspots(){
+  const camDir=new THREE.Vector3(); camera.getWorldDirection(camDir);
+  hotspotEls.forEach(({el,data})=>{
+    const pos=dirFromLonLat(data.lon,data.lat,480);
+    const rel=pos.clone().normalize();
+    const facing=rel.dot(camDir);
+    const p=pos.clone().project(camera);
+    if(facing>0 && Math.abs(p.x)<1.3 && Math.abs(p.y)<1.3){
+      el.style.display='block';
+      el.style.left=((p.x*0.5+0.5)*innerWidth)+'px';
+      el.style.top=((-p.y*0.5+0.5)*innerHeight)+'px';
+      el.style.opacity=Math.min(1,(facing-0.2)*2.2);
+    } else el.style.display='none';
+  });
+}
+
+function openModal(h){
+  document.getElementById('modalImg').style.backgroundImage=`url('${h.mimg}')`;
+  document.getElementById('modalTitle').textContent=h.title;
+  document.getElementById('modalText').textContent=h.text;
+  document.getElementById('modalTag').textContent=h.label;
+  document.getElementById('modalBg').classList.add('open');
+  autoRotate=false; document.getElementById('autoBtn').classList.remove('on');
+}
+
+function addEvents(){
+  const down=e=>{isDown=true;moved=false;const t=e.touches?e.touches[0]:e;downX=t.clientX;downY=t.clientY;dLon=lon;dLat=lat;autoRotate=false;document.getElementById('autoBtn').classList.remove('on');};
+  const move=e=>{if(!isDown)return;const t=e.touches?e.touches[0]:e;const dx=t.clientX-downX,dy=t.clientY-downY;if(Math.abs(dx)+Math.abs(dy)>4)moved=true;lon=dLon-dx*0.12;lat=Math.max(-40,Math.min(40,dLat+dy*0.12));const h=document.getElementById('hint');if(h)h.style.opacity=0;};
+  const up=()=>{isDown=false;};
+  viewer.addEventListener('mousedown',down);addEventListener('mousemove',move);addEventListener('mouseup',up);
+  viewer.addEventListener('touchstart',down,{passive:true});addEventListener('touchmove',move,{passive:true});addEventListener('touchend',up);
+  viewer.addEventListener('wheel',e=>{e.preventDefault();fov=Math.max(40,Math.min(90,fov+e.deltaY*0.05));camera.fov=fov;camera.updateProjectionMatrix();},{passive:false});
+  addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+  document.getElementById('autoBtn').addEventListener('click',function(){autoRotate=!autoRotate;this.classList.toggle('on',autoRotate);});
+  document.getElementById('zoomIn').addEventListener('click',()=>{fov=Math.max(40,fov-8);camera.fov=fov;camera.updateProjectionMatrix();});
+  document.getElementById('zoomOut').addEventListener('click',()=>{fov=Math.min(90,fov+8);camera.fov=fov;camera.updateProjectionMatrix();});
+  document.getElementById('fsBtn').addEventListener('click',()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();else document.exitFullscreen&&document.exitFullscreen();});
+  document.getElementById('modalClose').addEventListener('click',()=>document.getElementById('modalBg').classList.remove('open'));
+  document.getElementById('modalBg').addEventListener('click',e=>{if(e.target.id==='modalBg')document.getElementById('modalBg').classList.remove('open');});
+  document.getElementById('enterBtn').addEventListener('click',()=>{document.getElementById('intro').classList.add('hide');loadScene('dining',0);setTimeout(()=>{const h=document.getElementById('hint');if(h)h.style.opacity=.85;},900);setTimeout(()=>{const h=document.getElementById('hint');if(h)h.style.opacity=0;},6000);});
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  if(autoRotate&&!isDown)lon+=0.03;
+  lat=Math.max(-40,Math.min(40,lat));
+  phi=THREE.MathUtils.degToRad(90-lat);
+  theta=THREE.MathUtils.degToRad(lon);
+  const target=new THREE.Vector3(500*Math.sin(phi)*Math.cos(theta),500*Math.cos(phi),500*Math.sin(phi)*Math.sin(theta));
+  camera.lookAt(target);
+  updateHotspots();
+  renderer.render(scene,camera);
+}
+
+init();
+</script>
+</body>
+</html>

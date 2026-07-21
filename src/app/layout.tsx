@@ -1,17 +1,62 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Cormorant_Garamond, Fraunces, Inter, Jost } from "next/font/google";
 
 import "./globals.css";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
+import { CartProvider } from "@/lib/cart";
 import { cn } from "@/lib/utils";
 
-// Placeholder typography. The brand fonts arrive in Phase 2 with level40.css.
-const fontSans = Geist({ subsets: ["latin"], variable: "--font-sans" });
-const fontMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
+/**
+ * The source app pulled these from a Google Fonts <link>, which blocks render
+ * on a third-party round trip. Self-hosted here with the same weights and axes.
+ */
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-cormorant",
+  display: "swap",
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const jost = Jost({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  variable: "--font-jost",
+  display: "swap",
+});
+
+const siteUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
-  title: "Level 40 Café",
-  description: "Café, retail and meal plans in Jumeirah Village Circle, Dubai.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Level 40 — Modern Café in Dubai",
+    template: "%s — Level 40",
+  },
+  description:
+    "Level 40 is a modern Dubai café — chef-driven Arabian cuisine, dine-in QR ordering, and pickup.",
+  authors: [{ name: "Level 40 Café" }],
+  openGraph: {
+    type: "website",
+    siteName: "Level 40 Café",
+    locale: "en_AE",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({
@@ -23,10 +68,25 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontSans.variable, fontMono.variable)}
+      // Next 16 no longer overrides scroll-behavior during navigation. Without
+      // this, level40.css's `html{scroll-behavior:smooth}` makes every route
+      // change animate its scroll to top.
+      data-scroll-behavior="smooth"
+      className={cn(
+        cormorant.variable,
+        fraunces.variable,
+        inter.variable,
+        jost.variable,
+      )}
     >
-      <body className="flex min-h-svh flex-col">
-        <ThemeProvider>{children}</ThemeProvider>
+      <body>
+        <ThemeProvider>
+          <CartProvider>
+            <SiteHeader />
+            <main>{children}</main>
+            <SiteFooter />
+          </CartProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

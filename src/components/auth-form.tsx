@@ -166,6 +166,14 @@ export function AuthForm({
           minLength={8}
           required
         />
+        {!isSignup && (
+          <p
+            className="hint"
+            style={{ marginTop: ".45rem", textAlign: "right", fontSize: ".72rem" }}
+          >
+            <Link href="/auth/forgot-password">Forgot your password?</Link>
+          </p>
+        )}
       </div>
 
       <button

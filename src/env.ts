@@ -30,6 +30,24 @@ const envSchema = z
     // UAE VAT in basis points (500 = 5%). Config, not a constant: the source
     // hardcoded it in the browser, so a rate change meant a code change.
     VAT_RATE_BP: z.coerce.number().int().min(0).max(10000).default(500),
+    // Resend. Optional so the app boots before the account exists; every send
+    // becomes a logged no-op instead of a crash. Keys are prefixed "re_", so a
+    // pasted-in-wrong value fails at boot rather than at the first signup.
+    RESEND_API_KEY: z.string().startsWith("re_").optional(),
+    // The sender lives in config, not code, because it is the single thing that
+    // changes when the sending domain finishes verifying. Accepts a bare
+    // address or "Display Name <address@domain>".
+    EMAIL_FROM: z
+      .string()
+      .trim()
+      .regex(
+        /^(?:[^<>]+<\s*[^\s@<>]+@[^\s@<>]+\s*>|[^\s@<>]+@[^\s@<>]+)$/,
+        'must be "name@domain" or "Display Name <name@domain>"',
+      )
+      .optional(),
+    // Replies should reach a mailbox a human reads, which is not the sending
+    // domain. Optional: without it, replies go to EMAIL_FROM.
+    EMAIL_REPLY_TO: z.email().optional(),
   })
   .refine(
     (value) => !!value.GOOGLE_CLIENT_ID === !!value.GOOGLE_CLIENT_SECRET,
@@ -39,7 +57,13 @@ const envSchema = z
       error: "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set together",
       path: ["GOOGLE_CLIENT_ID"],
     },
-  );
+  )
+  .refine((value) => !value.RESEND_API_KEY || !!value.EMAIL_FROM, {
+    // A key without a sender would pass validation and then fail on every
+    // single send with an opaque Resend error. Catch it at boot instead.
+    error: "EMAIL_FROM is required whenever RESEND_API_KEY is set",
+    path: ["EMAIL_FROM"],
+  });
 
 const parsed = envSchema.safeParse(process.env);
 

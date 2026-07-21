@@ -63,6 +63,11 @@ A seventh admin segment. Follows the Phase 4 pattern exactly: query in
 
 ### 5e — Invoices 🔴 blocked on the client
 
+Emailing them is no longer work: `sendEmail` and the branded layout in
+[templates.ts](src/server/email/templates.ts) are in place, and
+[send.ts](src/server/email/send.ts) marks the seam. Only the document itself is
+blocked.
+
 **Blocker: the TRN.** `invoices.trn` is `notNull` and there is no value for it.
 An invoice carrying a placeholder TRN is worse than no invoice — it is a
 document that misstates a tax registration. Plan: read the TRN from env and
@@ -127,6 +132,48 @@ the client: whether the printed number needs a prefix or year segment
 - [ ] Change the seeded admin password (`IHLcDZ21UO1uwxjC`).
 - [ ] Publish the Google OAuth consent screen to "In production"
       (Audience: External).
+- [ ] 🔴 **Verify `level40wellness.com` in Resend.** Status is `not_started`,
+      added 2026-07-21. Until it verifies, `onboarding@resend.dev` can only
+      deliver to the address the Resend account is registered under — every
+      other recipient is a 403, so no real customer receives anything. Add
+      these three records at the DNS host, then press Verify:
+
+      | Type | Name | Value |
+      |---|---|---|
+      | TXT | `resend._domainkey` | `p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC7+zuralFR53TuWuH8IwyEQ0d6pBELFv9cBUdMtSSn+eRIl8QEVVPJ//o5qAbAw/yxHOxqvNOrhw1uDxim1lGlRsP9rvUfUbAQyoKDSSaPy1xHhnO5K5Bof0nHbxefxx+TZkI8kOI7SwNwgICqtEf7OFs0qVSy7kCswzs1MEQ+tQIDAQAB` |
+      | MX | `send` | `feedback-smtp.us-east-1.amazonses.com` (priority 10) |
+      | TXT | `send` | `v=spf1 include:amazonses.com ~all` |
+
+      None of these collide with the Amazon WorkMail records already on the
+      domain: the SPF/bounce pair sits on the `send` subdomain and DKIM uses
+      its own `resend` selector. Records undetected for 72h flip the domain to
+      `failed`; re-adding restarts it.
+- [ ] Then set `EMAIL_FROM="Level 40 Cafe <orders@level40wellness.com>"` — the
+      **root** domain, not `send.`. That is the only change the app needs.
+- [ ] Optional but recommended once verified: a DMARC TXT record at `_dmarc`,
+      starting at `v=DMARC1; p=none; rua=mailto:...` so you get reports without
+      rejecting anything.
+- [ ] Consider flipping `requireEmailVerification` to `true` in
+      [auth.ts](src/server/auth.ts) after verification. The OTP handler already
+      covers the `email-verification` type, so it is a one-line change.
+- [ ] Add the same three email vars to the Vercel project.
+
+### Email — built 2026-07-22, one gap
+
+Resend 6.18.0 is wired: welcome email on signup, and a six-digit OTP password
+reset at `/auth/forgot-password`. Sends are fire-and-forget by design — see the
+comment on `sendOtpEmail` in [send.ts](src/server/email/send.ts) for why a
+delivery failure must not surface to the user, and what that costs.
+
+⚠️ **Not yet rate limited.** `POST /forget-password/email-otp` is public and
+sends mail, so it is a quota-burn and spam vector. Better Auth's default
+limiter is in-memory, which does not hold across Vercel instances; doing it
+properly means `rateLimit: { storage: "database" }` and a new table, so it is
+deliberately a separate step with its own migration. **Do this before go-live.**
+
+ℹ️ Adding the `emailOTP` plugin also exposes `POST /sign-in/email-otp`.
+`disableSignUp: true` stops it creating accounts, but an existing user can sign
+in with an emailed code. There is no option to remove the route.
 
 ### Business / legal
 

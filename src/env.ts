@@ -20,6 +20,16 @@ const envSchema = z
     // sign-in is simply hidden until both are present.
     GOOGLE_CLIENT_ID: z.string().min(1).optional(),
     GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
+    PAYMENT_PROVIDER: z.enum(["mock", "stripe"]).default("mock"),
+    // Signs and verifies webhook payloads. In production this is the value the
+    // real gateway gives you, not one you choose.
+    PAYMENT_WEBHOOK_SECRET: z.string().min(32),
+    // Deliberately awkward: only the literal "1" unlocks mock payments in
+    // production, so it cannot be enabled by a stray truthy value.
+    ALLOW_MOCK_PAYMENTS: z.string().optional(),
+    // UAE VAT in basis points (500 = 5%). Config, not a constant: the source
+    // hardcoded it in the browser, so a rate change meant a code change.
+    VAT_RATE_BP: z.coerce.number().int().min(0).max(10000).default(500),
   })
   .refine(
     (value) => !!value.GOOGLE_CLIENT_ID === !!value.GOOGLE_CLIENT_SECRET,

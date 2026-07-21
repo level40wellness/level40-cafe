@@ -231,15 +231,18 @@ export default function CartPage() {
                   <b>{formatFils(totalFils)}</b>
                 </div>
               </div>
-              <p
+              <Link
+                href="/checkout"
+                className="place-btn"
                 style={{
-                  fontSize: ".72rem",
-                  color: "var(--cocoa)",
-                  marginTop: ".9rem",
+                  marginTop: "1.4rem",
+                  background: "var(--gold)",
+                  color: "var(--espresso)",
+                  borderColor: "var(--gold)",
                 }}
               >
-                Checkout arrives in the next phase.
-              </p>
+                Proceed to checkout
+              </Link>
               <Link href="/menu" className="os-cta-secondary">
                 Continue browsing
               </Link>

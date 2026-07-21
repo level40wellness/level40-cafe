@@ -155,6 +155,21 @@ export function SiteHeader() {
                       {user.email}
                     </div>
                   </div>
+                  <Link
+                    href="/account/orders"
+                    onClick={() => setMenuOpen(false)}
+                    style={{
+                      display: "block",
+                      color: "var(--cream)",
+                      padding: ".7rem 1rem",
+                      fontSize: ".78rem",
+                      letterSpacing: ".14em",
+                      textTransform: "uppercase",
+                      textDecoration: "none",
+                    }}
+                  >
+                    Your orders
+                  </Link>
                   <button
                     type="button"
                     onClick={() => {

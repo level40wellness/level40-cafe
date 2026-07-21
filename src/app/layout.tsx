@@ -4,11 +4,7 @@ import { Cormorant_Garamond, Fraunces, Inter, Jost } from "next/font/google";
 import { Toaster } from "sonner";
 
 import "./globals.css";
-import { CartDrawer } from "@/components/cart-drawer";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
-import { CartProvider } from "@/lib/cart";
 import { SITE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -61,6 +57,14 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
 };
 
+/**
+ * Deliberately minimal: fonts, theme and the toast portal, nothing else.
+ *
+ * The site header, footer and cart drawer live in (site)/layout.tsx instead. A
+ * nested layout can only add to its parent, never remove from it, so leaving
+ * the chrome here would have painted a storefront header across every admin
+ * screen with no way to opt out.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -83,13 +87,8 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <CartProvider>
-            <SiteHeader />
-            <main>{children}</main>
-            <SiteFooter />
-            <CartDrawer />
-            <Toaster position="bottom-right" richColors />
-          </CartProvider>
+          {children}
+          <Toaster position="bottom-right" richColors />
         </ThemeProvider>
       </body>
     </html>

@@ -1,5 +1,5 @@
 import "server-only";
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/db";
 import { categories, mealPlans, products } from "@/db/schema";
@@ -56,6 +56,20 @@ function toSummary(row: ProductRow): ProductSummary {
   };
 }
 
+/**
+ * "both" means the category appears on the menu *and* in the shop, so it has to
+ * satisfy either kind. Comparing for strict equality made a `both` category
+ * match neither query and silently drop its products from the whole public
+ * site — invisible until someone chose that option, since the seed only ever
+ * writes "cafe" or "retail".
+ */
+function matchesKind(
+  categoryKind: "cafe" | "retail" | "both" | undefined,
+  kind: "cafe" | "retail",
+) {
+  return categoryKind === kind || categoryKind === "both";
+}
+
 async function getProductsByKind(kind: "cafe" | "retail") {
   const rows = await db.query.products.findMany({
     where: eq(products.active, true),
@@ -67,7 +81,7 @@ async function getProductsByKind(kind: "cafe" | "retail") {
   });
 
   return rows.filter(
-    (row) => row.category?.kind === kind && row.category.active,
+    (row) => matchesKind(row.category?.kind, kind) && row.category?.active,
   ) as ProductRow[];
 }
 
@@ -75,7 +89,7 @@ async function getProductsByKind(kind: "cafe" | "retail") {
 export async function getMenu(): Promise<CategoryWithProducts[]> {
   const [cafeCategories, cafeProducts] = await Promise.all([
     db.query.categories.findMany({
-      where: eq(categories.kind, "cafe"),
+      where: inArray(categories.kind, ["cafe", "both"]),
       orderBy: [asc(categories.sortOrder), asc(categories.name)],
     }),
     getProductsByKind("cafe"),
@@ -102,7 +116,7 @@ export async function getShopProducts(): Promise<ProductSummary[]> {
 
 export async function getShopCategories() {
   const rows = await db.query.categories.findMany({
-    where: eq(categories.kind, "retail"),
+    where: inArray(categories.kind, ["retail", "both"]),
     orderBy: [asc(categories.sortOrder), asc(categories.name)],
   });
 
@@ -134,7 +148,7 @@ export async function getProductById(
 
   if (!row || !row.active) return null;
   if (!row.category?.active) return null;
-  if (kind && row.category.kind !== kind) return null;
+  if (kind && !matchesKind(row.category.kind, kind)) return null;
 
   return toSummary(row as ProductRow);
 }

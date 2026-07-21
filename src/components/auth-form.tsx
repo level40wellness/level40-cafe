@@ -12,9 +12,12 @@ type Mode = "signin" | "signup";
 export function AuthForm({
   initialMode,
   googleEnabled,
+  returnTo,
 }: {
   initialMode: Mode;
   googleEnabled: boolean;
+  /** Already narrowed to a same-site path by the page; never used raw. */
+  returnTo: string;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>(initialMode);
@@ -42,7 +45,7 @@ export function AuthForm({
       }
 
       toast.success(isSignup ? "Account created." : "Welcome back.");
-      router.push("/");
+      router.push(returnTo);
       router.refresh();
     } catch (error) {
       toast.error(
@@ -58,7 +61,7 @@ export function AuthForm({
 
     try {
       // Redirects away, so nothing after this runs on success.
-      await signIn.social({ provider: "google", callbackURL: "/" });
+      await signIn.social({ provider: "google", callbackURL: returnTo });
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Google sign-in failed",

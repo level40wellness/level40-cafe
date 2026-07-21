@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { AuthForm } from "@/components/auth-form";
 import { HERO_IMG } from "@/lib/images";
+import { safeInternalPath } from "@/lib/safe-redirect";
 import { isGoogleEnabled } from "@/server/auth";
 import { getSession } from "@/server/guards";
 
@@ -20,14 +21,15 @@ export default async function AuthPage({
   searchParams,
 }: {
   // searchParams is a Promise in Next 16.
-  searchParams: Promise<{ mode?: string }>;
+  searchParams: Promise<{ mode?: string; next?: string }>;
 }) {
+  const { mode, next } = await searchParams;
+  const returnTo = safeInternalPath(next);
+
   const session = await getSession();
 
   // Already signed in — there is nothing for this page to do.
-  if (session?.user) redirect("/");
-
-  const { mode } = await searchParams;
+  if (session?.user) redirect(returnTo);
 
   return (
     <div className="login-page">
@@ -52,6 +54,7 @@ export default async function AuthPage({
         <AuthForm
           initialMode={mode === "signup" ? "signup" : "signin"}
           googleEnabled={isGoogleEnabled}
+          returnTo={returnTo}
         />
       </div>
     </div>

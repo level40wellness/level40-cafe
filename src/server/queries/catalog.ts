@@ -160,11 +160,11 @@ export async function getMealPlans(): Promise<MealPlanSummary[]> {
       mealsPerWeek: mealPlans.mealsPerWeek,
       durationWeeks: mealPlans.durationWeeks,
       features: mealPlans.features,
-      sortOrder: mealPlans.sortOrder,
     })
     .from(mealPlans)
     .where(eq(mealPlans.active, true))
+    // Ordering happens in SQL, so sortOrder need not be selected.
     .orderBy(asc(mealPlans.sortOrder), asc(mealPlans.name));
 
-  return rows.map(({ sortOrder: _sortOrder, ...plan }) => plan);
+  return rows;
 }

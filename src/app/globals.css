@@ -12,7 +12,8 @@
 @import "shadcn/tailwind.css";
 @import "../styles/brand-system.css";
 @import "../styles/level40.css";
-/* Additive only, and last so it can rely on level40.css's variables. */
+/* Additive only, and last so they can rely on level40.css's variables. */
+@import "../styles/site.css";
 @import "../styles/admin.css";
 
 @custom-variant dark (&:is(.dark *));

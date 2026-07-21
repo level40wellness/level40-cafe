@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { ForgotPasswordForm } from "@/components/forgot-password-form";
 import { HERO_IMG } from "@/lib/images";
+import { safeInternalPath } from "@/lib/safe-redirect";
 import { getSession } from "@/server/guards";
 
 export const metadata: Metadata = {
@@ -13,7 +14,25 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-export default async function ForgotPasswordPage() {
+export default async function ForgotPasswordPage({
+  // searchParams is a Promise in Next 16.
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
+
+  /**
+   * Resetting a password does not sign anyone in, so this flow cannot land on
+   * /admin itself — it can only hand back to /auth, which then routes through
+   * /auth/landing and sends an admin to the console. Carrying `next` this far
+   * is what keeps an interrupted destination alive across the detour.
+   */
+  const returnTo = safeInternalPath(next, "");
+  const signInHref = returnTo
+    ? `/auth?next=${encodeURIComponent(returnTo)}`
+    : "/auth";
+
   const session = await getSession();
 
   // Someone already signed in has no use for a reset code. There is no account
@@ -40,7 +59,7 @@ export default async function ForgotPasswordPage() {
       </div>
 
       <div className="login-form-side">
-        <ForgotPasswordForm />
+        <ForgotPasswordForm signInHref={signInHref} />
       </div>
     </div>
   );

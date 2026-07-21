@@ -14,7 +14,16 @@ import { emailOtp } from "@/lib/auth-client";
  */
 type Step = "request" | "reset";
 
-export function ForgotPasswordForm() {
+export function ForgotPasswordForm({
+  signInHref,
+}: {
+  /**
+   * Where to hand back once the password is changed, with any ?next= already
+   * narrowed by the page. A reset issues no session, so signing in again is
+   * unavoidable — /auth/landing makes the role decision from there.
+   */
+  signInHref: string;
+}) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("request");
   const [email, setEmail] = useState("");
@@ -75,7 +84,7 @@ export function ForgotPasswordForm() {
       }
 
       toast.success("Password changed. You can sign in now.");
-      router.push("/auth");
+      router.push(signInHref);
     } catch {
       toast.error("That code was not accepted.");
     } finally {
@@ -118,7 +127,7 @@ export function ForgotPasswordForm() {
         </button>
 
         <p className="hint" style={{ marginTop: "1rem", textAlign: "center" }}>
-          Remembered it? <Link href="/auth">Sign in</Link>
+          Remembered it? <Link href={signInHref}>Sign in</Link>
         </p>
       </form>
     );

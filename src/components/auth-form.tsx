@@ -12,12 +12,19 @@ type Mode = "signin" | "signup";
 export function AuthForm({
   initialMode,
   googleEnabled,
-  returnTo,
+  landingHref,
+  forgotPasswordHref,
 }: {
   initialMode: Mode;
   googleEnabled: boolean;
-  /** Already narrowed to a same-site path by the page; never used raw. */
-  returnTo: string;
+  /**
+   * The /auth/landing URL, with any ?next= already narrowed by the page; never
+   * built from a raw query value here. That route picks the final destination
+   * on the server, since the role it branches on is not in the client session.
+   */
+  landingHref: string;
+  /** The reset flow, carrying the same narrowed ?next= as landingHref. */
+  forgotPasswordHref: string;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>(initialMode);
@@ -45,7 +52,7 @@ export function AuthForm({
       }
 
       toast.success(isSignup ? "Account created." : "Welcome back.");
-      router.push(returnTo);
+      router.push(landingHref);
       router.refresh();
     } catch (error) {
       toast.error(
@@ -60,8 +67,10 @@ export function AuthForm({
     setBusy(true);
 
     try {
-      // Redirects away, so nothing after this runs on success.
-      await signIn.social({ provider: "google", callbackURL: returnTo });
+      // Redirects away, so nothing after this runs on success. The callback
+      // lands on /auth/landing rather than the final path, because by the time
+      // the OAuth round trip returns there is no client code left to choose.
+      await signIn.social({ provider: "google", callbackURL: landingHref });
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Google sign-in failed",
@@ -171,7 +180,7 @@ export function AuthForm({
             className="hint"
             style={{ marginTop: ".45rem", textAlign: "right", fontSize: ".72rem" }}
           >
-            <Link href="/auth/forgot-password">Forgot your password?</Link>
+            <Link href={forgotPasswordHref}>Forgot your password?</Link>
           </p>
         )}
       </div>

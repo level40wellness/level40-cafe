@@ -1,10 +1,12 @@
 import "server-only";
 import { headers } from "next/headers";
-import { and, eq } from "drizzle-orm";
 
-import { db } from "@/db";
-import { userRole } from "@/db/schema";
 import { auth } from "./auth";
+import { isAdmin } from "./roles";
+
+// Re-exported so callers keep importing their authorization from one place,
+// even though the query itself has to live outside this file.
+export { isAdmin };
 
 /**
  * Leaving Supabase removed row-level security, so authorization is no longer
@@ -28,16 +30,6 @@ export async function requireUser() {
   }
 
   return session.user;
-}
-
-export async function isAdmin(userId: string) {
-  const [row] = await db
-    .select({ id: userRole.id })
-    .from(userRole)
-    .where(and(eq(userRole.userId, userId), eq(userRole.role, "admin")))
-    .limit(1);
-
-  return row !== undefined;
 }
 
 export async function requireAdmin() {

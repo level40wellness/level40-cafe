@@ -9,6 +9,7 @@ import { orderItems, orders, payments, products } from "@/db/schema";
 import { env } from "@/env";
 import { getPaymentGateway } from "@/lib/payments";
 import { getSession } from "@/server/guards";
+import { consumeRateLimit } from "@/server/rate-limit";
 
 /**
  * The client sends product ids and quantities. It does not send prices, and
@@ -40,6 +41,26 @@ export type CheckoutResult =
   | { ok: false; error: string };
 
 export async function createCheckout(input: CheckoutInput): Promise<CheckoutResult> {
+  /**
+   * Before validation on purpose. Anyone can call this without signing in, and
+   * each success writes three tables and opens a gateway session — so the flood
+   * worth stopping is the whole call, malformed ones included.
+   */
+  const limit = await consumeRateLimit({
+    name: "checkout",
+    windowSeconds: 900,
+    max: 15,
+  });
+
+  if (!limit.allowed) {
+    const minutes = Math.ceil(limit.retryAfterSeconds / 60);
+
+    return {
+      ok: false,
+      error: `Too many orders from this device. Please try again in ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+    };
+  }
+
   const parsed = checkoutSchema.safeParse(input);
 
   if (!parsed.success) {

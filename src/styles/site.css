@@ -1,0 +1,36 @@
+/*
+ * Storefront fixes that did not exist in the source app.
+ *
+ * Same contract as admin.css: level40.css stays a verbatim port of the client's
+ * hand-written CSS, so corrections to it live here instead. Everything is
+ * scoped tightly enough to leave the original rule serving its original caller.
+ */
+
+/*
+ * The .os-* item classes were written for the .os summary aside, which is
+ * espresso — level40.css calls --gold-soft "lighter honey tint for text on
+ * dark" in as many words. The order confirmation reuses them inside .co-panel,
+ * which is #fff, so --cream text landed on a white card at roughly 1.05:1 and
+ * read as faded. These restore the light-panel palette .co-panel already uses
+ * for its own heading and subtitle.
+ */
+.co-panel .os-name,
+.co-panel .os-line {
+  color: var(--espresso);
+}
+.co-panel .os-qty {
+  color: var(--cocoa);
+}
+.co-panel .os-item {
+  /*
+   * Two children here, not the three the checkout renders — there is no
+   * thumbnail, so the original 52px column was squeezing the name into it and
+   * leaving the trailing auto column empty.
+   */
+  grid-template-columns: 1fr auto;
+  border-bottom-color: rgba(122, 90, 67, 0.18);
+}
+/* Nothing follows the list, so the trailing rule divides the panel from air. */
+.co-panel .os-item:last-child {
+  border-bottom: 0;
+}

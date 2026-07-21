@@ -24,12 +24,25 @@ export default async function AuthPage({
   searchParams: Promise<{ mode?: string; next?: string }>;
 }) {
   const { mode, next } = await searchParams;
-  const returnTo = safeInternalPath(next);
+  // Empty rather than "/" so /auth/landing can tell a visitor who asked for
+  // nothing from one who asked for the homepage. It applies the admin default
+  // only to the first.
+  const returnTo = safeInternalPath(next, "");
+  const landingHref = returnTo
+    ? `/auth/landing?next=${encodeURIComponent(returnTo)}`
+    : "/auth/landing";
+  // The reset detour hands back to /auth, so it has to carry the destination
+  // with it or an interrupted visitor loses it at the first step.
+  const forgotPasswordHref = returnTo
+    ? `/auth/forgot-password?next=${encodeURIComponent(returnTo)}`
+    : "/auth/forgot-password";
 
   const session = await getSession();
 
-  // Already signed in — there is nothing for this page to do.
-  if (session?.user) redirect(returnTo);
+  // Already signed in — there is nothing for this page to do. Sent through the
+  // landing route rather than straight to returnTo, so an admin who opens /auth
+  // out of habit still ends up at the console.
+  if (session?.user) redirect(landingHref);
 
   return (
     <div className="login-page">
@@ -54,7 +67,8 @@ export default async function AuthPage({
         <AuthForm
           initialMode={mode === "signup" ? "signup" : "signin"}
           googleEnabled={isGoogleEnabled}
-          returnTo={returnTo}
+          landingHref={landingHref}
+          forgotPasswordHref={forgotPasswordHref}
         />
       </div>
     </div>

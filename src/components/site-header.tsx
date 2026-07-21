@@ -155,6 +155,30 @@ export function SiteHeader() {
                       {user.email}
                     </div>
                   </div>
+                  {/*
+                    Drawn only for admins, and only ever a shortcut: /admin
+                    checks the role again on the server before it renders, so
+                    revealing this to a customer would cost them a click, not
+                    access.
+                  */}
+                  {user.isAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMenuOpen(false)}
+                      style={{
+                        display: "block",
+                        color: "var(--gold)",
+                        padding: ".7rem 1rem",
+                        fontSize: ".78rem",
+                        letterSpacing: ".14em",
+                        textTransform: "uppercase",
+                        textDecoration: "none",
+                        fontWeight: 600,
+                      }}
+                    >
+                      Management Panel
+                    </Link>
+                  )}
                   <Link
                     href="/account/orders"
                     onClick={() => setMenuOpen(false)}

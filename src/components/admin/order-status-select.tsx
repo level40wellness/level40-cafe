@@ -6,6 +6,7 @@ import {
   orderStatusLabel,
 } from "@/lib/order-status";
 import { setOrderStatusAction } from "@/server/actions/admin/orders";
+import { AdminSelect } from "./admin-select";
 import { useAdminAction } from "./admin-form";
 
 /**
@@ -28,24 +29,23 @@ export function OrderStatusSelect({
   }
 
   return (
-    <select
-      className="a-select"
-      value={status}
+    <AdminSelect
+      label="Change order status"
+      // No value: the current status is already the badge in the column
+      // alongside. The native control had to carry it as the selected option,
+      // which is why every row read "Paid → Paid"; this one only offers moves.
+      placeholder="Move to…"
       disabled={action.pending}
-      aria-label="Change order status"
-      onChange={(event) => {
+      options={options.map((option) => ({
+        value: option,
+        label: orderStatusLabel(option),
+      }))}
+      onSelect={(next) => {
         const formData = new FormData();
         formData.set("id", orderId);
-        formData.set("status", event.target.value);
+        formData.set("status", next);
         void action.submit(formData);
       }}
-    >
-      <option value={status}>{orderStatusLabel(status)}</option>
-      {options.map((option) => (
-        <option key={option} value={option}>
-          → {orderStatusLabel(option)}
-        </option>
-      ))}
-    </select>
+    />
   );
 }

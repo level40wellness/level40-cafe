@@ -55,7 +55,9 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
 
   return (
-    <section className="bg-background py-10 sm:py-14">
+    // header.nav is position:fixed (68px under 960px, 84px above), so the top
+    // padding has to clear it rather than merely space the content.
+    <section className="bg-background pb-16 pt-24 text-foreground lg:pb-20 lg:pt-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
           href="/shop"
@@ -116,14 +118,14 @@ export default async function ProductPage({ params }: Props) {
                 priceFils={product.priceFils}
                 imagePath={product.imagePath}
                 inStock={product.inStock}
-                className="inline-flex h-12 items-center gap-2 rounded-full bg-brass px-6 text-sm font-semibold text-brass-foreground shadow-md shadow-black/20 hover:opacity-90 disabled:opacity-50"
+                className="inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-brass px-6 text-sm font-semibold text-brass-foreground shadow-md shadow-black/20 hover:opacity-90 disabled:opacity-50"
               >
                 <Plus className="h-4 w-4" />{" "}
                 {product.inStock ? "Add to cart" : "Out of stock"}
               </AddToCart>
               <Link
                 href="/shop"
-                className="inline-flex h-12 items-center rounded-full border border-border px-6 text-sm font-medium hover:border-brass hover:text-brass"
+                className="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-full border border-border px-6 text-sm font-medium text-foreground hover:border-brass hover:text-brass"
               >
                 Continue shopping
               </Link>

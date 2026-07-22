@@ -10,7 +10,9 @@ import { z } from "zod";
  */
 const envSchema = z
   .object({
-    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+    NODE_ENV: z
+      .enum(["development", "test", "production"])
+      .default("development"),
     DATABASE_URL: z.url(),
     // 32 bytes of entropy. Production must use a different value to development,
     // set in the Vercel dashboard rather than committed anywhere.
@@ -48,6 +50,7 @@ const envSchema = z
     // Replies should reach a mailbox a human reads, which is not the sending
     // domain. Optional: without it, replies go to EMAIL_FROM.
     EMAIL_REPLY_TO: z.email().optional(),
+    BLOB_READ_WRITE_TOKEN: z.string().startsWith("vercel_blob_rw_").optional(),
   })
   .refine(
     (value) => !!value.GOOGLE_CLIENT_ID === !!value.GOOGLE_CLIENT_SECRET,

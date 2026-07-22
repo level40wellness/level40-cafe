@@ -22,7 +22,11 @@
   --serif:var(--font-cormorant),Georgia,serif;
   --sans:var(--font-jost),system-ui,sans-serif;
 }
-*{margin:0;padding:0;box-sizing:border-box}
+/* Kept in @layer base because unlayered CSS outranks every layer: at the top
+   level this rule beat Tailwind's own margin and padding utilities (which live
+   in @layer utilities), silently zeroing them wherever they were used.
+   Tailwind's preflight already applies the same reset. */
+@layer base{*{margin:0;padding:0;box-sizing:border-box}}
 html{scroll-behavior:smooth}
 body{font-family:var(--sans);color:var(--ink);background:var(--cream);line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 h1,h2,h3,h4{font-family:var(--display);font-weight:400;line-height:1.06;letter-spacing:-.01em}

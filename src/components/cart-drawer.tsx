@@ -133,7 +133,7 @@ export function CartDrawer() {
             >
               {lines.map((line) => (
                 <li
-                  key={line.productId}
+                  key={line.id}
                   style={{
                     display: "grid",
                     gridTemplateColumns: "60px 1fr auto",
@@ -166,6 +166,17 @@ export function CartDrawer() {
                     <div style={{ fontSize: ".75rem", color: "var(--cocoa)" }}>
                       {formatFils(line.priceFils)} each
                     </div>
+                    {(line.size || line.color) && (
+                      <div
+                        style={{
+                          fontSize: ".72rem",
+                          color: "var(--cocoa)",
+                          marginTop: ".1rem",
+                        }}
+                      >
+                        {[line.size, line.color].filter(Boolean).join(" · ")}
+                      </div>
+                    )}
                     <div
                       style={{
                         display: "flex",
@@ -185,7 +196,7 @@ export function CartDrawer() {
                         <button
                           type="button"
                           aria-label={`Decrease ${line.name}`}
-                          onClick={() => setQty(line.productId, line.qty - 1)}
+                          onClick={() => setQty(line.id, line.qty - 1)}
                           style={quantityButton}
                         >
                           <Minus className="h-3.5 w-3.5" />
@@ -203,7 +214,7 @@ export function CartDrawer() {
                         <button
                           type="button"
                           aria-label={`Increase ${line.name}`}
-                          onClick={() => setQty(line.productId, line.qty + 1)}
+                          onClick={() => setQty(line.id, line.qty + 1)}
                           style={quantityButton}
                         >
                           <Plus className="h-3.5 w-3.5" />
@@ -211,7 +222,7 @@ export function CartDrawer() {
                       </div>
                       <button
                         type="button"
-                        onClick={() => remove(line.productId)}
+                        onClick={() => remove(line.id)}
                         style={{
                           display: "inline-flex",
                           alignItems: "center",

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Plus } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
-import { AddToCart } from "@/components/add-to-cart";
+import { ProductPurchase } from "@/components/product-purchase";
 import { formatFils } from "@/lib/format";
 import { getActiveProductIds, getProductById } from "@/server/queries/catalog";
 
@@ -111,18 +111,17 @@ export default async function ProductPage({ params }: Props) {
               </div>
             )}
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <AddToCart
-                productId={product.id}
-                name={product.name}
-                priceFils={product.priceFils}
-                imagePath={product.imagePath}
-                inStock={product.inStock}
-                className="inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-brass px-6 text-sm font-semibold text-brass-foreground shadow-md shadow-black/20 hover:opacity-90 disabled:opacity-50"
-              >
-                <Plus className="h-4 w-4" />{" "}
-                {product.inStock ? "Add to cart" : "Out of stock"}
-              </AddToCart>
+            <ProductPurchase
+              productId={product.id}
+              name={product.name}
+              priceFils={product.priceFils}
+              imagePath={product.imagePath}
+              inStock={product.inStock}
+              sizeOptions={product.sizeOptions}
+              colorOptions={product.colorOptions}
+            />
+
+            <div className="mt-4">
               <Link
                 href="/shop"
                 className="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-full border border-border px-6 text-sm font-medium text-foreground hover:border-brass hover:text-brass"

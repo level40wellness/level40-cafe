@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   boolean,
   index,
   integer,
@@ -24,6 +25,17 @@ export const categories = pgTable(
     name: text().notNull(),
     slug: text().notNull(),
     kind: categoryKind().default("both").notNull(),
+    /**
+     * Self-reference builds the tree the flat table could not express, e.g.
+     * "Mats > Jute Mats". The explicit AnyPgColumn return type breaks the
+     * circular inference Drizzle otherwise trips on. ON DELETE SET NULL, not
+     * CASCADE: deleting a parent lifts its children to the top level rather
+     * than silently deleting a whole subtree — the admin action refuses the
+     * delete while children remain, so this is only a backstop.
+     */
+    parentId: uuid().references((): AnyPgColumn => categories.id, {
+      onDelete: "set null",
+    }),
     sortOrder: integer().default(0).notNull(),
     active: boolean().default(true).notNull(),
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
@@ -31,8 +43,17 @@ export const categories = pgTable(
   },
   (table) => [
     uniqueIndex("categories_slug_kind_uniq").on(sql`lower(${table.slug})`, table.kind),
+    index("categories_parent_id_idx").on(table.parentId),
   ],
 );
+
+/**
+ * A selectable colour for a retail product. `hex` is optional: when set the
+ * storefront renders a swatch, otherwise a plain text pill. Stored inline as
+ * jsonb rather than in a child table because the set is small, always read
+ * whole with its product, and never queried across products.
+ */
+export type ColorOption = { name: string; hex: string | null };
 
 /**
  * One catalog for both the café menu and the retail shop, discriminated by
@@ -50,9 +71,22 @@ export const products = pgTable(
     description: text(),
     priceFils: integer().default(0).notNull(),
     categoryId: uuid().references(() => categories.id, { onDelete: "set null" }),
+    /**
+     * Stable business key for bulk CSV import: a matching SKU updates the row,
+     * a new one inserts. Nullable because café menu items have none — Postgres
+     * treats every NULL as distinct, so many null-SKU rows coexist under the
+     * unique index below.
+     */
+    sku: text(),
     // Menu-specific presentation, previously only in the static file.
     tags: text().array().default([]).notNull(),
     emoji: text(),
+    /**
+     * Retail variant options. One price per product by design, so these are
+     * plain option lists the customer chooses from, not separately-priced rows.
+     */
+    sizeOptions: text().array().default([]).notNull(),
+    colorOptions: jsonb().$type<ColorOption[]>().default([]).notNull(),
     inStock: boolean().default(true).notNull(),
     sortOrder: integer().default(0).notNull(),
     active: boolean().default(true).notNull(),
@@ -60,7 +94,10 @@ export const products = pgTable(
     createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index("products_category_id_idx").on(table.categoryId)],
+  (table) => [
+    index("products_category_id_idx").on(table.categoryId),
+    uniqueIndex("products_sku_uniq").on(sql`lower(${table.sku})`),
+  ],
 );
 
 /**
@@ -99,8 +136,14 @@ export const mealPlans = pgTable("meal_plans", {
   updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
 });
 
-export const categoriesRelations = relations(categories, ({ many }) => ({
+export const categoriesRelations = relations(categories, ({ one, many }) => ({
   products: many(products),
+  parent: one(categories, {
+    fields: [categories.parentId],
+    references: [categories.id],
+    relationName: "category_parent",
+  }),
+  children: many(categories, { relationName: "category_parent" }),
 }));
 
 export const productsRelations = relations(products, ({ one, many }) => ({

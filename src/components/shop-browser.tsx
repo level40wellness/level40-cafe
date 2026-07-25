@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { AddToCart } from "@/components/add-to-cart";
+import type { ColorOption } from "@/db/schema/catalog";
 import { formatFils } from "@/lib/format";
 
 export interface ShopItem {
@@ -13,6 +14,8 @@ export interface ShopItem {
   priceFils: number;
   imagePath: string | null;
   inStock: boolean;
+  sizeOptions: string[];
+  colorOptions: ColorOption[];
   categoryName: string | null;
   categorySlug: string | null;
 }
@@ -83,13 +86,22 @@ export function ShopBrowser({
               {product.description && <p>{product.description}</p>}
               <div className="row">
                 <span className="price">{formatFils(product.priceFils)}</span>
-                <AddToCart
-                  productId={product.id}
-                  name={product.name}
-                  priceFils={product.priceFils}
-                  imagePath={product.imagePath}
-                  inStock={product.inStock}
-                />
+                {product.sizeOptions.length > 0 || product.colorOptions.length > 0 ? (
+                  // Options must be chosen on the product page, so quick-add is
+                  // replaced by a link there rather than adding an unspecified
+                  // variant straight to the cart.
+                  <Link href={`/shop/${product.id}`} className="add">
+                    Choose options
+                  </Link>
+                ) : (
+                  <AddToCart
+                    productId={product.id}
+                    name={product.name}
+                    priceFils={product.priceFils}
+                    imagePath={product.imagePath}
+                    inStock={product.inStock}
+                  />
+                )}
               </div>
             </div>
           </div>

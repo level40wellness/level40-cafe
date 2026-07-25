@@ -7,6 +7,14 @@ import { z } from "zod";
 import { db } from "@/db";
 import { categories, productImages, products } from "@/db/schema";
 import { requireAdmin } from "@/server/guards";
+// Prices are entered in AED and stored in fils. The size/colour parsers are
+// shared with the CSV importer so a variant typed in the form and one uploaded
+// in a sheet are stored identically. Both accept the same `|`-separated format.
+import {
+  parseAedToFils,
+  parseColorOptions,
+  parseSizeOptions,
+} from "@/lib/product-csv";
 import {
   type ActionResult,
   fromUnknownError,
@@ -14,22 +22,6 @@ import {
 } from "./result";
 
 const MAX_IMAGES = 5;
-
-/**
- * Prices are entered in AED and stored in fils.
- *
- * parseFloat + *100 is not safe here: 19.99 * 100 is 1998.9999999999998 in
- * IEEE-754, and the source app's `Math.round(parseFloat(x) * 100)` only
- * papered over it. Splitting on the decimal point keeps the arithmetic in
- * integers, so what the admin typed is what gets stored.
- */
-function parseAedToFils(input: string): number | null {
-  const trimmed = input.trim().replace(/^AED\s*/i, "");
-  if (!/^\d{1,7}(\.\d{1,2})?$/.test(trimmed)) return null;
-
-  const [dirhams, fils = ""] = trimmed.split(".");
-  return Number(dirhams) * 100 + Number(fils.padEnd(2, "0"));
-}
 
 const imageSchema = z.object({
   path: z.url("Each image must be a URL."),
@@ -47,6 +39,8 @@ const productSchema = z.object({
   categoryId: z.uuid("Choose a category."),
   emoji: z.string().trim().max(8).optional(),
   tags: z.string().trim().max(300).optional(),
+  sizes: z.string().trim().max(400).optional(),
+  colors: z.string().trim().max(800).optional(),
   sortOrder: z.coerce.number().int().min(0).max(9999).default(0),
   inStock: z.boolean(),
   active: z.boolean(),
@@ -73,6 +67,8 @@ function parse(formData: FormData) {
     categoryId: formData.get("categoryId"),
     emoji: formData.get("emoji") || undefined,
     tags: formData.get("tags") || undefined,
+    sizes: formData.get("sizes") || undefined,
+    colors: formData.get("colors") || undefined,
     sortOrder: formData.get("sortOrder") || 0,
     inStock: formData.get("inStock") === "on",
     active: formData.get("active") === "on",
@@ -176,6 +172,8 @@ export async function createProductAction(
         categoryId: parsed.data.categoryId,
         emoji: parsed.data.emoji ?? null,
         tags: splitTags(parsed.data.tags),
+        sizeOptions: parseSizeOptions(parsed.data.sizes ?? ""),
+        colorOptions: parseColorOptions(parsed.data.colors ?? ""),
         sortOrder: parsed.data.sortOrder,
         inStock: parsed.data.inStock,
         active: parsed.data.active,
@@ -238,6 +236,8 @@ export async function updateProductAction(
         categoryId: parsed.data.categoryId,
         emoji: parsed.data.emoji ?? null,
         tags: splitTags(parsed.data.tags),
+        sizeOptions: parseSizeOptions(parsed.data.sizes ?? ""),
+        colorOptions: parseColorOptions(parsed.data.colors ?? ""),
         sortOrder: parsed.data.sortOrder,
         inStock: parsed.data.inStock,
         active: parsed.data.active,

@@ -12,9 +12,11 @@ import {
   updateProductAction,
 } from "@/server/actions/admin/products";
 import type { AdminProduct } from "@/server/queries/admin";
+import { formatColorOptions } from "@/lib/product-csv";
 import { Field, FormError, useAdminAction } from "./admin-form";
 import { type DraftImage, ImageUploader } from "./image-uploader";
 import { Modal } from "./modal";
+import { ProductImportBar } from "./product-import";
 import { EmptyRow, PanelHead, StatCards } from "./ui";
 
 type Kind = "cafe" | "retail";
@@ -156,6 +158,8 @@ export function ProductManager({
             {remove.pending ? "Deleting…" : `Delete ${selected.size}`}
           </button>
         )}
+        {/* Bulk CSV upload/export is retail-only; the café menu is edited by hand. */}
+        {!isCafe && <ProductImportBar />}
         <button
           type="button"
           className="a-btn primary"
@@ -452,6 +456,36 @@ function ProductDialog({
             />
           </Field>
         </div>
+
+        {/* Variant options are retail-only. One price per product, so these are
+            just the choices a customer picks — separated by | like the CSV. */}
+        {!isCafe && (
+          <div className="a-grid-2">
+            <Field label="Sizes" htmlFor="product-sizes" error={form.fieldErrors?.sizes}>
+              <input
+                id="product-sizes"
+                name="sizes"
+                className="a-input"
+                defaultValue={product?.sizeOptions.join(" | ") ?? ""}
+                placeholder="S | M | L | XL"
+              />
+            </Field>
+
+            <Field
+              label="Colours"
+              htmlFor="product-colors"
+              error={form.fieldErrors?.colors}
+            >
+              <input
+                id="product-colors"
+                name="colors"
+                className="a-input"
+                defaultValue={product ? formatColorOptions(product.colorOptions) : ""}
+                placeholder="Black:#000000 | Blue:#0066bf | Cream"
+              />
+            </Field>
+          </div>
+        )}
 
         <ImageUploader value={images} onChange={setImages} />
 

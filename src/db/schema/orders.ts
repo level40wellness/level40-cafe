@@ -99,6 +99,9 @@ export const orderItems = pgTable(
       .references(() => orders.id, { onDelete: "cascade" }),
     productId: uuid().references(() => products.id, { onDelete: "set null" }),
     name: text().notNull(),
+    // Snapshot of the buyer's chosen variant; null for products without options.
+    size: text(),
+    color: text(),
     unitPriceFils: integer().notNull(),
     quantity: integer().notNull(),
     lineTotalFils: integer().notNull(),

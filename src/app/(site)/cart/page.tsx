@@ -75,7 +75,7 @@ export default function CartPage() {
               >
                 {lines.map((line) => (
                   <li
-                    key={line.productId}
+                    key={line.id}
                     style={{
                       display: "grid",
                       gridTemplateColumns: "68px 1fr auto",
@@ -115,6 +115,17 @@ export default function CartPage() {
                       >
                         {formatFils(line.priceFils)} each
                       </div>
+                      {(line.size || line.color) && (
+                        <div
+                          style={{
+                            fontSize: ".78rem",
+                            color: "var(--cocoa)",
+                            marginTop: ".15rem",
+                          }}
+                        >
+                          {[line.size, line.color].filter(Boolean).join(" · ")}
+                        </div>
+                      )}
                       {line.notes && (
                         <div
                           style={{
@@ -145,7 +156,7 @@ export default function CartPage() {
                         >
                           <button
                             type="button"
-                            onClick={() => setQty(line.productId, line.qty - 1)}
+                            onClick={() => setQty(line.id, line.qty - 1)}
                             aria-label={`Decrease ${line.name}`}
                             style={quantityButton}
                           >
@@ -164,7 +175,7 @@ export default function CartPage() {
                           </span>
                           <button
                             type="button"
-                            onClick={() => setQty(line.productId, line.qty + 1)}
+                            onClick={() => setQty(line.id, line.qty + 1)}
                             aria-label={`Increase ${line.name}`}
                             style={quantityButton}
                           >
@@ -173,7 +184,7 @@ export default function CartPage() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => remove(line.productId)}
+                          onClick={() => remove(line.id)}
                           style={{
                             display: "inline-flex",
                             alignItems: "center",

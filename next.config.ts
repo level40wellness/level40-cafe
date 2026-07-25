@@ -18,6 +18,22 @@ const nextConfig: NextConfig = {
         hostname: "*.public.blob.vercel-storage.com",
         pathname: "/**",
       },
+      /**
+       * The NeatByNikky product photos are imported by URL and still served from
+       * the original WordPress media library. Scoped to the uploads path so the
+       * optimizer cannot be pointed at arbitrary paths on the host. Writing one
+       * of these URLs into a product needs the admin role, as with Blob above.
+       */
+      {
+        protocol: "https",
+        hostname: "www.neatbynicky.com",
+        pathname: "/wp-content/uploads/**",
+      },
+      {
+        protocol: "https",
+        hostname: "neatbynicky.com",
+        pathname: "/wp-content/uploads/**",
+      },
     ],
   },
 };

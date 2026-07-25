@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { CornerDownRight, Pencil, Plus, Trash2 } from "lucide-react";
 
 import {
   createCategoryAction,
@@ -19,8 +19,56 @@ const KIND_LABEL = {
   both: "Both",
 } as const;
 
+const KIND_RANK = { cafe: 0, retail: 1, both: 2 } as const;
+
 /** `null` means "new"; a row means "edit"; `undefined` means the modal is shut. */
 type Editing = AdminCategory | null | undefined;
+
+interface TreeRow {
+  item: AdminCategory;
+  depth: number;
+}
+
+/**
+ * Depth-first flatten so children render directly under their parent, indented.
+ * Roots are grouped by kind first (café before retail) so the two catalogues
+ * stay apart; siblings follow sortOrder then name.
+ */
+function buildTree(items: AdminCategory[]): TreeRow[] {
+  const childrenOf = new Map<string | null, AdminCategory[]>();
+  for (const item of items) {
+    const key = item.parentId ?? null;
+    const list = childrenOf.get(key);
+    if (list) list.push(item);
+    else childrenOf.set(key, [item]);
+  }
+
+  const compare = (a: AdminCategory, b: AdminCategory) =>
+    KIND_RANK[a.kind] - KIND_RANK[b.kind] ||
+    a.sortOrder - b.sortOrder ||
+    a.name.localeCompare(b.name);
+
+  const rows: TreeRow[] = [];
+  const visited = new Set<string>();
+
+  const walk = (parentId: string | null, depth: number) => {
+    for (const item of (childrenOf.get(parentId) ?? []).slice().sort(compare)) {
+      if (visited.has(item.id)) continue;
+      visited.add(item.id);
+      rows.push({ item, depth });
+      walk(item.id, depth + 1);
+    }
+  };
+  walk(null, 0);
+
+  // A category whose parent id points nowhere would otherwise vanish; surface
+  // it at the top level rather than dropping it silently.
+  for (const item of items) {
+    if (!visited.has(item.id)) rows.push({ item, depth: 0 });
+  }
+
+  return rows;
+}
 
 export function CategoryManager({ items }: { items: AdminCategory[] }) {
   const [editing, setEditing] = useState<Editing>(undefined);
@@ -29,7 +77,18 @@ export function CategoryManager({ items }: { items: AdminCategory[] }) {
 
   const remove = useAdminAction(deleteCategoryAction);
 
-  const filtered = items.filter((item) => {
+  const { rows, nameById, childCountById } = useMemo(() => {
+    const nameById = new Map(items.map((item) => [item.id, item.name]));
+    const childCountById = new Map<string, number>();
+    for (const item of items) {
+      if (item.parentId) {
+        childCountById.set(item.parentId, (childCountById.get(item.parentId) ?? 0) + 1);
+      }
+    }
+    return { rows: buildTree(items), nameById, childCountById };
+  }, [items]);
+
+  const filtered = rows.filter(({ item }) => {
     if (kindFilter !== "all" && item.kind !== kindFilter) return false;
     const term = query.trim().toLowerCase();
     if (!term) return true;
@@ -40,16 +99,22 @@ export function CategoryManager({ items }: { items: AdminCategory[] }) {
   });
 
   function handleDelete(item: AdminCategory) {
-    const warning =
-      item.productCount > 0
-        ? `"${item.name}" still holds ${item.productCount} product${item.productCount === 1 ? "" : "s"} and cannot be deleted until they are moved.`
-        : `Delete "${item.name}"? This cannot be undone.`;
-
     if (item.productCount > 0) {
-      window.alert(warning);
+      window.alert(
+        `"${item.name}" still holds ${item.productCount} product${item.productCount === 1 ? "" : "s"} and cannot be deleted until they are moved.`,
+      );
       return;
     }
-    if (!window.confirm(warning)) return;
+
+    const children = childCountById.get(item.id) ?? 0;
+    if (children > 0) {
+      window.alert(
+        `"${item.name}" has ${children} sub-categor${children === 1 ? "y" : "ies"}. Delete or move them first.`,
+      );
+      return;
+    }
+
+    if (!window.confirm(`Delete "${item.name}"? This cannot be undone.`)) return;
 
     const formData = new FormData();
     formData.set("id", item.id);
@@ -90,7 +155,7 @@ export function CategoryManager({ items }: { items: AdminCategory[] }) {
 
       <PanelHead
         title="Category master"
-        subtitle="Sections used across the café menu and the retail shop."
+        subtitle="Sections used across the café menu and the retail shop. Sub-categories nest under their parent."
       >
         <div className="a-search">
           <input
@@ -127,6 +192,7 @@ export function CategoryManager({ items }: { items: AdminCategory[] }) {
           <thead>
             <tr>
               <th>Name</th>
+              <th>Parent</th>
               <th>Slug</th>
               <th>Appears in</th>
               <th className="right">Products</th>
@@ -137,16 +203,33 @@ export function CategoryManager({ items }: { items: AdminCategory[] }) {
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <EmptyRow colSpan={7}>
+              <EmptyRow colSpan={8}>
                 {items.length === 0
                   ? "No categories yet."
                   : "Nothing matches that filter."}
               </EmptyRow>
             ) : (
-              filtered.map((item) => (
+              filtered.map(({ item, depth }) => (
                 <tr key={item.id}>
                   <td>
-                    <div className="primary-cell">{item.name}</div>
+                    <div
+                      className="a-who"
+                      style={{ paddingLeft: depth * 20, gap: ".4rem" }}
+                    >
+                      {depth > 0 && (
+                        <CornerDownRight
+                          size={14}
+                          aria-hidden="true"
+                          style={{ opacity: 0.5, flexShrink: 0 }}
+                        />
+                      )}
+                      <span className="primary-cell">{item.name}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="muted">
+                      {item.parentId ? (nameById.get(item.parentId) ?? "—") : "—"}
+                    </span>
                   </td>
                   <td>
                     <span className="muted">{item.slug}</span>
@@ -191,6 +274,7 @@ export function CategoryManager({ items }: { items: AdminCategory[] }) {
       {editing !== undefined && (
         <CategoryDialog
           category={editing}
+          items={items}
           onClose={() => setEditing(undefined)}
         />
       )}
@@ -198,11 +282,36 @@ export function CategoryManager({ items }: { items: AdminCategory[] }) {
   );
 }
 
+/** Categories that sit beneath `rootId`, so the editor cannot pick one as its own parent. */
+function descendantsOf(rootId: string, items: AdminCategory[]): Set<string> {
+  const childrenOf = new Map<string, AdminCategory[]>();
+  for (const item of items) {
+    if (!item.parentId) continue;
+    const list = childrenOf.get(item.parentId);
+    if (list) list.push(item);
+    else childrenOf.set(item.parentId, [item]);
+  }
+
+  const result = new Set<string>();
+  const stack = [rootId];
+  while (stack.length > 0) {
+    const current = stack.pop()!;
+    for (const child of childrenOf.get(current) ?? []) {
+      if (result.has(child.id)) continue;
+      result.add(child.id);
+      stack.push(child.id);
+    }
+  }
+  return result;
+}
+
 function CategoryDialog({
   category,
+  items,
   onClose,
 }: {
   category: AdminCategory | null;
+  items: AdminCategory[];
   onClose: () => void;
 }) {
   const isEdit = category !== null;
@@ -210,6 +319,36 @@ function CategoryDialog({
     isEdit ? updateCategoryAction : createCategoryAction,
     { onSuccess: onClose },
   );
+
+  const [kind, setKind] = useState<AdminCategory["kind"]>(category?.kind ?? "retail");
+  const [parentId, setParentId] = useState<string>(category?.parentId ?? "");
+
+  // A category cannot be its own parent, nor sit under one of its own
+  // descendants, nor cross to a different catalogue side.
+  const excluded = useMemo(
+    () => (category ? descendantsOf(category.id, items) : new Set<string>()),
+    [category, items],
+  );
+
+  const parentOptions = items.filter((item) => {
+    if (category && item.id === category.id) return false;
+    if (excluded.has(item.id)) return false;
+    return item.kind === kind || item.kind === "both" || kind === "both";
+  });
+
+  function pathLabel(item: AdminCategory): string {
+    const names: string[] = [];
+    const seen = new Set<string>();
+    let current: AdminCategory | undefined = item;
+    while (current && !seen.has(current.id)) {
+      seen.add(current.id);
+      names.unshift(current.name);
+      current = current.parentId
+        ? items.find((candidate) => candidate.id === current!.parentId)
+        : undefined;
+    }
+    return names.join(" › ");
+  }
 
   return (
     <Modal
@@ -219,6 +358,9 @@ function CategoryDialog({
     >
       <form action={form.submit} className="a-stack">
         {isEdit && <input type="hidden" name="id" value={category.id} />}
+        {/* The parent select is controlled, so its value posts even though the
+            native select is re-rendered when the kind filter changes. */}
+        <input type="hidden" name="parentId" value={parentId} />
         <FormError message={form.formError} />
 
         <Field label="Name" htmlFor="category-name" error={form.fieldErrors?.name}>
@@ -228,7 +370,7 @@ function CategoryDialog({
             className="a-input"
             defaultValue={category?.name ?? ""}
             aria-invalid={Boolean(form.fieldErrors?.name)}
-            placeholder="e.g. Signatures"
+            placeholder="e.g. Jute Mats"
             required
             maxLength={80}
           />
@@ -252,7 +394,21 @@ function CategoryDialog({
               id="category-kind"
               name="kind"
               className="a-select-i"
-              defaultValue={category?.kind ?? "retail"}
+              value={kind}
+              onChange={(event) => {
+                const next = event.target.value as AdminCategory["kind"];
+                setKind(next);
+                // Drop a parent that no longer belongs to the chosen side.
+                const parent = parentId ? items.find((i) => i.id === parentId) : null;
+                if (
+                  parent &&
+                  parent.kind !== next &&
+                  parent.kind !== "both" &&
+                  next !== "both"
+                ) {
+                  setParentId("");
+                }
+              }}
             >
               <option value="cafe">Café menu</option>
               <option value="retail">Retail shop</option>
@@ -261,21 +417,43 @@ function CategoryDialog({
           </Field>
 
           <Field
-            label="Sort order"
-            htmlFor="category-sort"
-            error={form.fieldErrors?.sortOrder}
+            label="Parent category"
+            htmlFor="category-parent"
+            error={form.fieldErrors?.parentId}
           >
-            <input
-              id="category-sort"
-              name="sortOrder"
-              className="a-input"
-              type="number"
-              min={0}
-              max={9999}
-              defaultValue={category?.sortOrder ?? 0}
-            />
+            <select
+              id="category-parent"
+              className="a-select-i"
+              value={parentId}
+              aria-invalid={Boolean(form.fieldErrors?.parentId)}
+              onChange={(event) => setParentId(event.target.value)}
+            >
+              <option value="">— None (top level) —</option>
+              {parentOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {pathLabel(option)}
+                  {option.active ? "" : " (hidden)"}
+                </option>
+              ))}
+            </select>
           </Field>
         </div>
+
+        <Field
+          label="Sort order"
+          htmlFor="category-sort"
+          error={form.fieldErrors?.sortOrder}
+        >
+          <input
+            id="category-sort"
+            name="sortOrder"
+            className="a-input"
+            type="number"
+            min={0}
+            max={9999}
+            defaultValue={category?.sortOrder ?? 0}
+          />
+        </Field>
 
         <label className="a-check">
           <input

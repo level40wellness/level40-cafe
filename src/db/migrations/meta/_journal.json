@@ -22,6 +22,13 @@
       "when": 1784667941867,
       "tag": "0002_curious_karma",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784948448382,
+      "tag": "0003_neat_jean_grey",
+      "breakpoints": true
     }
   ]
 }

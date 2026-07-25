@@ -16,15 +16,35 @@ import {
  * source app computed the payable total in the browser.
  */
 export interface CartLine {
+  /** Stable per-variant line id: the product plus the chosen size/colour. */
+  id: string;
   productId: string;
   name: string;
   priceFils: number;
   imagePath: string | null;
+  size?: string | null;
+  color?: string | null;
   qty: number;
   notes?: string;
 }
 
-const STORAGE_KEY = "l40.cart.v1";
+/**
+ * Two lines are the same line only when the product *and* the chosen variant
+ * match, so "Jute Mats — Black" and "Jute Mats — Green" stack separately.
+ * Without the variant in the key they would merge and lose the distinction the
+ * customer just made.
+ */
+export function cartLineId(
+  productId: string,
+  size?: string | null,
+  color?: string | null,
+): string {
+  return `${productId}|${size ?? ""}|${color ?? ""}`;
+}
+
+// Bumped from v1: the line shape gained an id and variant fields, so a cart
+// persisted by the old code is intentionally not read back.
+const STORAGE_KEY = "l40.cart.v2";
 const TABLE_KEY = "l40.table.v1";
 
 /*
@@ -52,7 +72,16 @@ function loadOnce() {
 
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) lines = JSON.parse(stored) as CartLine[];
+    if (stored) {
+      const parsed = JSON.parse(stored) as CartLine[];
+      // Defensive: guarantee every line has an id, so React keys and removals
+      // stay stable even if an older-shaped line slips through.
+      lines = parsed.map((line) =>
+        line.id
+          ? line
+          : { ...line, id: cartLineId(line.productId, line.size, line.color) },
+      );
+    }
     tableNumber = localStorage.getItem(TABLE_KEY);
   } catch {
     // Corrupt or unavailable storage must not stop the site rendering.
@@ -122,33 +151,33 @@ export function setTableNumber(table: string | null) {
   emit();
 }
 
-export function addToCart(line: Omit<CartLine, "qty">, qty = 1) {
-  const existing = lines.find((candidate) => candidate.productId === line.productId);
+export function addToCart(line: Omit<CartLine, "qty" | "id">, qty = 1) {
+  const id = cartLineId(line.productId, line.size, line.color);
+  const existing = lines.find((candidate) => candidate.id === id);
 
   setLines(
     existing
       ? lines.map((candidate) =>
-          candidate.productId === line.productId
-            ? { ...candidate, qty: candidate.qty + qty }
-            : candidate,
+          candidate.id === id ? { ...candidate, qty: candidate.qty + qty } : candidate,
         )
-      : [...lines, { ...line, qty }],
+      : [
+          ...lines,
+          { ...line, id, size: line.size ?? null, color: line.color ?? null, qty },
+        ],
   );
 }
 
-export function removeFromCart(productId: string) {
-  setLines(lines.filter((line) => line.productId !== productId));
+export function removeFromCart(lineId: string) {
+  setLines(lines.filter((line) => line.id !== lineId));
 }
 
-export function setCartQty(productId: string, qty: number) {
+export function setCartQty(lineId: string, qty: number) {
   if (qty <= 0) {
-    removeFromCart(productId);
+    removeFromCart(lineId);
     return;
   }
 
-  setLines(
-    lines.map((line) => (line.productId === productId ? { ...line, qty } : line)),
-  );
+  setLines(lines.map((line) => (line.id === lineId ? { ...line, qty } : line)));
 }
 
 export function clearCart() {

@@ -14,6 +14,7 @@ import {
   user,
   userRole,
 } from "@/db/schema";
+import type { ColorOption } from "@/db/schema";
 import { requireAdmin } from "@/server/guards";
 
 /**
@@ -98,6 +99,7 @@ export async function getAdminCategories() {
       name: categories.name,
       slug: categories.slug,
       kind: categories.kind,
+      parentId: categories.parentId,
       sortOrder: categories.sortOrder,
       active: categories.active,
       productCount: count(products.id),
@@ -119,6 +121,8 @@ export interface AdminProduct {
   categoryName: string | null;
   tags: string[];
   emoji: string | null;
+  sizeOptions: string[];
+  colorOptions: ColorOption[];
   inStock: boolean;
   active: boolean;
   sortOrder: number;
@@ -158,6 +162,8 @@ export async function getAdminProducts(
       categoryName: row.category?.name ?? null,
       tags: row.tags,
       emoji: row.emoji,
+      sizeOptions: row.sizeOptions,
+      colorOptions: row.colorOptions,
       inStock: row.inStock,
       active: row.active,
       sortOrder: row.sortOrder,

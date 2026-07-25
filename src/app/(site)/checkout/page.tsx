@@ -55,8 +55,13 @@ export default function CheckoutPage() {
         fulfilment: tableNumber ? "dine_in" : "pickup",
         tableNumber,
         notes: String(form.get("notes") ?? "") || undefined,
-        // Ids and quantities only. Prices stay on the server.
-        lines: lines.map((line) => ({ productId: line.productId, qty: line.qty })),
+        // Ids, quantities and the chosen variant. Prices stay on the server.
+        lines: lines.map((line) => ({
+          productId: line.productId,
+          qty: line.qty,
+          size: line.size ?? null,
+          color: line.color ?? null,
+        })),
       });
 
       if (!result.ok) {
@@ -178,7 +183,7 @@ export default function CheckoutPage() {
               </span>
             </h2>
             {lines.map((line) => (
-              <div className="os-item" key={line.productId}>
+              <div className="os-item" key={line.id}>
                 <div
                   className="os-thumb"
                   style={
@@ -189,6 +194,11 @@ export default function CheckoutPage() {
                 />
                 <div>
                   <div className="os-name">{line.name}</div>
+                  {(line.size || line.color) && (
+                    <div className="os-qty">
+                      {[line.size, line.color].filter(Boolean).join(" · ")}
+                    </div>
+                  )}
                   <div className="os-qty">
                     {formatFils(line.priceFils)} × {line.qty}
                   </div>

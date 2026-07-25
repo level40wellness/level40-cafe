@@ -59,6 +59,11 @@ export default async function AdminOrderDetailPage({
                 <tr key={item.id}>
                   <td>
                     <div className="primary-cell">{item.name}</div>
+                    {(item.size || item.color) && (
+                      <span className="muted">
+                        {[item.size, item.color].filter(Boolean).join(" · ")}
+                      </span>
+                    )}
                     {item.productId === null && (
                       <span className="muted">
                         Product since deleted — this line keeps its own record

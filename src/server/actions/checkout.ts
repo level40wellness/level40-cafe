@@ -28,6 +28,8 @@ const checkoutSchema = z.object({
       z.object({
         productId: z.uuid(),
         qty: z.number().int().min(1).max(99),
+        size: z.string().trim().max(50).nullish(),
+        color: z.string().trim().max(50).nullish(),
       }),
     )
     .min(1, "Your cart is empty")
@@ -69,11 +71,25 @@ export async function createCheckout(input: CheckoutInput): Promise<CheckoutResu
 
   const data = parsed.data;
 
-  // Collapse duplicate ids so a repeated product cannot be counted twice.
-  const quantities = new Map<string, number>();
+  // Group by product *and* chosen variant, so each variant is its own order
+  // line and a repeated (product, size, colour) is only counted once.
+  type Group = {
+    productId: string;
+    size: string | null;
+    color: string | null;
+    qty: number;
+  };
+  const groups = new Map<string, Group>();
   for (const line of data.lines) {
-    quantities.set(line.productId, (quantities.get(line.productId) ?? 0) + line.qty);
+    const size = line.size?.trim() || null;
+    const color = line.color?.trim() || null;
+    const key = `${line.productId}|${size ?? ""}|${color ?? ""}`;
+    const existing = groups.get(key);
+    if (existing) existing.qty += line.qty;
+    else groups.set(key, { productId: line.productId, size, color, qty: line.qty });
   }
+
+  const productIds = [...new Set([...groups.values()].map((group) => group.productId))];
 
   const rows = await db
     .select({
@@ -82,35 +98,60 @@ export async function createCheckout(input: CheckoutInput): Promise<CheckoutResu
       priceFils: products.priceFils,
       active: products.active,
       inStock: products.inStock,
+      sizeOptions: products.sizeOptions,
+      colorOptions: products.colorOptions,
     })
     .from(products)
-    .where(inArray(products.id, [...quantities.keys()]));
+    .where(inArray(products.id, productIds));
 
   const available = new Map(rows.map((row) => [row.id, row]));
 
-  for (const productId of quantities.keys()) {
-    const product = available.get(productId);
+  const items: {
+    productId: string;
+    name: string;
+    size: string | null;
+    color: string | null;
+    unitPriceFils: number;
+    quantity: number;
+    lineTotalFils: number;
+  }[] = [];
+
+  for (const group of groups.values()) {
+    const product = available.get(group.productId);
 
     if (!product || !product.active) {
       return { ok: false, error: "An item in your cart is no longer available." };
     }
-
     if (!product.inStock) {
       return { ok: false, error: `${product.name} is out of stock.` };
     }
-  }
 
-  const items = [...quantities.entries()].map(([productId, qty]) => {
-    const product = available.get(productId)!;
+    // The chosen variant is re-validated against the product's own options —
+    // the browser cannot smuggle in a size or colour that is not offered.
+    if (product.sizeOptions.length > 0 && (!group.size || !product.sizeOptions.includes(group.size))) {
+      return { ok: false, error: `Please choose a size for ${product.name}.` };
+    }
+    if (
+      product.colorOptions.length > 0 &&
+      (!group.color || !product.colorOptions.some((option) => option.name === group.color))
+    ) {
+      return { ok: false, error: `Please choose a colour for ${product.name}.` };
+    }
 
-    return {
-      productId,
+    // A product without options never carries one, even if the client sent it.
+    const size = product.sizeOptions.length > 0 ? group.size : null;
+    const color = product.colorOptions.length > 0 ? group.color : null;
+
+    items.push({
+      productId: group.productId,
       name: product.name,
+      size,
+      color,
       unitPriceFils: product.priceFils,
-      quantity: qty,
-      lineTotalFils: product.priceFils * qty,
-    };
-  });
+      quantity: group.qty,
+      lineTotalFils: product.priceFils * group.qty,
+    });
+  }
 
   const subtotalFils = items.reduce((total, item) => total + item.lineTotalFils, 0);
   const vatRateBp = env.VAT_RATE_BP;
@@ -146,6 +187,8 @@ export async function createCheckout(input: CheckoutInput): Promise<CheckoutResu
         orderId,
         productId: item.productId,
         name: item.name,
+        size: item.size,
+        color: item.color,
         unitPriceFils: item.unitPriceFils,
         quantity: item.quantity,
         lineTotalFils: item.lineTotalFils,

@@ -30,17 +30,61 @@ function toFils(aed: number) {
   return Math.round(aed * 100);
 }
 
-const CATEGORY_SEED = [
+/**
+ * The retail side is a tree (see the NeatByNikki category screenshots), so
+ * entries carry an optional `parent` slug. They are listed parents-first, which
+ * lets the seeder resolve a parent id from earlier rows in a single pass.
+ *
+ * Slugs match what slugify() produces from the name, so the CSV importer
+ * resolves the same category rather than creating a duplicate: "TPE Yoga Mat"
+ * and the sheet's "TPE YOGA MAT" both slug to "tpe-yoga-mat".
+ */
+type CategorySeed = {
+  name: string;
+  slug: string;
+  kind: "cafe" | "retail" | "both";
+  sortOrder: number;
+  parent?: string;
+};
+
+const CATEGORY_SEED: CategorySeed[] = [
+  // Café menu — flat.
   { name: "Signatures", slug: "signatures", kind: "cafe", sortOrder: 10 },
   { name: "Mezze", slug: "mezze", kind: "cafe", sortOrder: 20 },
   { name: "Mains", slug: "mains", kind: "cafe", sortOrder: 30 },
   { name: "Desserts", slug: "desserts", kind: "cafe", sortOrder: 40 },
   { name: "Beverages", slug: "beverages", kind: "cafe", sortOrder: 50 },
+
+  // Retail — top level.
   { name: "Mats", slug: "mats", kind: "retail", sortOrder: 10 },
   { name: "Accessories", slug: "accessories", kind: "retail", sortOrder: 20 },
   { name: "Activewear", slug: "activewear", kind: "retail", sortOrder: 30 },
-  { name: "Wellness", slug: "wellness", kind: "retail", sortOrder: 40 },
-] as const;
+
+  // Accessories → mid level.
+  { name: "Bags & Carriers", slug: "bags-carriers", kind: "retail", parent: "accessories", sortOrder: 10 },
+  { name: "Props", slug: "props", kind: "retail", parent: "accessories", sortOrder: 20 },
+  // Accessories → leaves.
+  { name: "Mat Carrier", slug: "mat-carrier", kind: "retail", parent: "bags-carriers", sortOrder: 10 },
+  { name: "Yoga Bags", slug: "yoga-bags", kind: "retail", parent: "bags-carriers", sortOrder: 20 },
+  { name: "Strap", slug: "strap", kind: "retail", parent: "props", sortOrder: 10 },
+  { name: "Yoga Blocks", slug: "yoga-blocks", kind: "retail", parent: "props", sortOrder: 20 },
+
+  // Activewear → leaves.
+  { name: "Leggings", slug: "leggings", kind: "retail", parent: "activewear", sortOrder: 10 },
+  { name: "Sets", slug: "sets", kind: "retail", parent: "activewear", sortOrder: 20 },
+  { name: "Shorts", slug: "shorts", kind: "retail", parent: "activewear", sortOrder: 30 },
+  { name: "Sports Bra", slug: "sports-bra", kind: "retail", parent: "activewear", sortOrder: 40 },
+
+  // Mats → leaves.
+  { name: "Meditation Yoga Mat", slug: "meditation-yoga-mat", kind: "retail", parent: "mats", sortOrder: 10 },
+  { name: "Balanced Mats", slug: "balanced-mats", kind: "retail", parent: "mats", sortOrder: 20 },
+  { name: "TPE Yoga Mat", slug: "tpe-yoga-mat", kind: "retail", parent: "mats", sortOrder: 30 },
+  { name: "Jute Mats", slug: "jute-mats", kind: "retail", parent: "mats", sortOrder: 40 },
+  { name: "Cork Mats", slug: "cork-mats", kind: "retail", parent: "mats", sortOrder: 50 },
+  { name: "Travel Mats", slug: "travel-mats", kind: "retail", parent: "mats", sortOrder: 60 },
+  { name: "Suede Chunky Mats", slug: "suede-chunky-mats", kind: "retail", parent: "mats", sortOrder: 70 },
+  { name: "Premium Mats", slug: "premium-mats", kind: "retail", parent: "mats", sortOrder: 80 },
+];
 
 /** The 17 items from the source app's menu-data.ts. */
 const MENU_SEED = [
@@ -63,27 +107,14 @@ const MENU_SEED = [
   { id: "bev-4", name: "Pomegranate Fizz", description: "Pomegranate, lime, sparkling, fresh thyme.", price: 24, slug: "beverages", tags: [], emoji: "🍹" },
 ] as const;
 
-/** The 18 retail items from the source app's SHOP array. */
-const SHOP_SEED = [
-  { id: "mat-balanced", name: "Balanced Mat", description: "Dual-layer alignment mat for steady standing poses.", price: 240, slug: "mats", tags: ["Bestseller"], emoji: "🧘" },
-  { id: "mat-travel", name: "Travel Mat", description: "Ultra-light foldable mat — slips into any carry-on.", price: 180, slug: "mats", tags: [], emoji: "🎒" },
-  { id: "mat-meditation", name: "Meditation Yoga Mat", description: "Soft, grounding mat designed for long meditation sits.", price: 220, slug: "mats", tags: [], emoji: "🕯️" },
-  { id: "mat-suede", name: "Suede Chunky Mat", description: "Plush suede top, extra-thick natural rubber base.", price: 320, slug: "mats", tags: ["Premium"], emoji: "✨" },
-  { id: "mat-tpe", name: "TPE Yoga Mat", description: "Eco-friendly TPE mat, lightweight with superior grip.", price: 200, slug: "mats", tags: [], emoji: "🌿" },
-  { id: "mat-jute", name: "Jute Mat", description: "Natural jute weave bonded to PER for grounded practice.", price: 260, slug: "mats", tags: [], emoji: "🌾" },
-  { id: "mat-cork", name: "Cork Mat", description: "Antimicrobial cork surface — better grip the more you sweat.", price: 280, slug: "mats", tags: [], emoji: "🟫" },
-  { id: "mat-premium", name: "Premium Yoga Mat", description: "Studio-grade, oversized, with lifetime guarantee.", price: 380, slug: "mats", tags: ["Premium"], emoji: "💎" },
-  { id: "acc-block", name: "Cork Yoga Block", description: "Pair of natural cork blocks for support and alignment.", price: 90, slug: "accessories", tags: [], emoji: "🧱" },
-  { id: "acc-strap", name: "Cotton Yoga Strap", description: "2m organic cotton strap with steel D-ring buckle.", price: 60, slug: "accessories", tags: [], emoji: "🪢" },
-  { id: "acc-bolster", name: "Meditation Bolster", description: "Buckwheat-filled bolster for restorative poses.", price: 180, slug: "accessories", tags: [], emoji: "🛋️" },
-  { id: "acc-bag", name: "Mat Carry Bag", description: "Canvas tote with adjustable strap and side pocket.", price: 110, slug: "accessories", tags: [], emoji: "👜" },
-  { id: "wear-leg", name: "High-Rise Yoga Leggings", description: "Buttery-soft, squat-proof, four-way stretch.", price: 220, slug: "activewear", tags: [], emoji: "🩱" },
-  { id: "wear-bra", name: "Studio Sports Bra", description: "Medium support, seamless, breathable mesh back.", price: 160, slug: "activewear", tags: [], emoji: "👕" },
-  { id: "wear-tank", name: "Flow Tank Top", description: "Light, drapey tank perfect for vinyasa flow.", price: 140, slug: "activewear", tags: [], emoji: "🎽" },
-  { id: "well-tea", name: "Calming Herbal Tea", description: "Chamomile, rose, and ashwagandha blend (50g).", price: 70, slug: "wellness", tags: [], emoji: "🍵" },
-  { id: "well-oil", name: "Lavender Essential Oil", description: "Pure therapeutic-grade lavender (15ml).", price: 95, slug: "wellness", tags: [], emoji: "🌸" },
-  { id: "well-candle", name: "Sandalwood Candle", description: "Hand-poured soy candle, 40-hour burn.", price: 120, slug: "wellness", tags: [], emoji: "🕯️" },
-] as const;
+/**
+ * The retail catalogue is no longer seeded from a static array. It is loaded
+ * through the CSV importer at /admin/shop (source of truth:
+ * public/admin/neatbynicky-products.csv), which also carries the Size/Colour
+ * options and image URLs a flat seed row could not express. A fresh database
+ * therefore starts with the retail *categories* but an empty shop until the
+ * sheet is imported.
+ */
 
 const MEAL_PLAN_SEED = [
   {
@@ -120,17 +151,37 @@ const MEAL_PLAN_SEED = [
 ] as const;
 
 async function seedCategories() {
-  await db
-    .insert(categories)
-    .values(CATEGORY_SEED.map((category) => ({ ...category })))
-    .onConflictDoNothing();
+  const bySlug = new Map<string, string>();
 
-  const rows = await db
-    .select({ id: categories.id, slug: categories.slug, kind: categories.kind })
+  // Re-runnable: anything already present is kept, so existing ids are reused
+  // and a second run adds only what is new.
+  const existing = await db
+    .select({ id: categories.id, slug: categories.slug })
     .from(categories);
+  for (const row of existing) bySlug.set(row.slug, row.id);
 
-  // Slugs are unique per kind, and no slug is shared across kinds here.
-  return new Map(rows.map((row) => [row.slug, row.id]));
+  for (const category of CATEGORY_SEED) {
+    if (bySlug.has(category.slug)) continue;
+
+    const parentId = category.parent ? bySlug.get(category.parent) ?? null : null;
+
+    // Explicit type: the categories.parentId self-reference makes Drizzle's
+    // inferred returning type recurse, which TS collapses to a circular any.
+    const inserted: { id: string }[] = await db
+      .insert(categories)
+      .values({
+        name: category.name,
+        slug: category.slug,
+        kind: category.kind,
+        parentId,
+        sortOrder: category.sortOrder,
+      })
+      .returning({ id: categories.id });
+
+    bySlug.set(category.slug, inserted[0].id);
+  }
+
+  return bySlug;
 }
 
 type CatalogEntry = {
@@ -254,9 +305,10 @@ async function main() {
   if (productCount > 0) {
     console.log(`products   : ${productCount} already present, skipped`);
   } else {
+    // Café menu only. The retail shop is loaded via the CSV importer at
+    // /admin/shop — see public/admin/neatbynicky-products.csv.
     await seedCatalog(categoryIds, MENU_SEED, "menu");
-    await seedCatalog(categoryIds, SHOP_SEED, "shop");
-    console.log(`products   : ${MENU_SEED.length + SHOP_SEED.length}`);
+    console.log(`products   : ${MENU_SEED.length} (café menu; import retail via /admin/shop)`);
   }
 
   const [{ count: planCount }] = await db

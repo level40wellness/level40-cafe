@@ -3,6 +3,7 @@ import { asc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/db";
 import { categories, mealPlans, products } from "@/db/schema";
+import type { ColorOption } from "@/db/schema";
 
 /**
  * Read side of the data-access layer.
@@ -22,6 +23,8 @@ export interface ProductSummary {
   tags: string[];
   emoji: string | null;
   inStock: boolean;
+  sizeOptions: string[];
+  colorOptions: ColorOption[];
   imagePath: string | null;
   categoryName: string | null;
   categorySlug: string | null;
@@ -50,6 +53,8 @@ function toSummary(row: ProductRow): ProductSummary {
     tags: row.tags,
     emoji: row.emoji,
     inStock: row.inStock,
+    sizeOptions: row.sizeOptions,
+    colorOptions: row.colorOptions,
     imagePath: image?.path ?? null,
     categoryName: row.category?.name ?? null,
     categorySlug: row.category?.slug ?? null,

@@ -26,6 +26,8 @@ export interface ProductSummary {
   sizeOptions: string[];
   colorOptions: ColorOption[];
   imagePath: string | null;
+  /** Every image, ordered — the product page renders these as a gallery. */
+  images: string[];
   categoryName: string | null;
   categorySlug: string | null;
 }
@@ -43,7 +45,7 @@ type ProductRow = typeof products.$inferSelect & {
 };
 
 function toSummary(row: ProductRow): ProductSummary {
-  const image = [...row.images].sort((a, b) => a.sortOrder - b.sortOrder)[0];
+  const sorted = [...row.images].sort((a, b) => a.sortOrder - b.sortOrder);
 
   return {
     id: row.id,
@@ -55,7 +57,8 @@ function toSummary(row: ProductRow): ProductSummary {
     inStock: row.inStock,
     sizeOptions: row.sizeOptions,
     colorOptions: row.colorOptions,
-    imagePath: image?.path ?? null,
+    imagePath: sorted[0]?.path ?? null,
+    images: sorted.map((image) => image.path),
     categoryName: row.category?.name ?? null,
     categorySlug: row.category?.slug ?? null,
   };

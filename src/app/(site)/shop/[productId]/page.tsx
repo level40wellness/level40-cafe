@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 
+import { ProductGallery } from "@/components/product-gallery";
 import { ProductPurchase } from "@/components/product-purchase";
 import { formatFils } from "@/lib/format";
 import { getActiveProductIds, getProductById } from "@/server/queries/catalog";
@@ -67,18 +67,7 @@ export default async function ProductPage({ params }: Props) {
         </Link>
 
         <div className="mt-8 grid gap-10 lg:grid-cols-2">
-          <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-secondary">
-            {product.imagePath && (
-              <Image
-                src={product.imagePath}
-                alt={product.name}
-                fill
-                sizes="(min-width: 1024px) 50vw, 100vw"
-                className="object-cover"
-                priority
-              />
-            )}
-          </div>
+          <ProductGallery images={product.images} name={product.name} />
 
           <div className="lg:pt-4">
             {product.categoryName && (

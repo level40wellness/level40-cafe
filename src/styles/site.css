@@ -52,6 +52,33 @@
   white-space: normal;
   min-width: 0;
 }
+
+/*
+ * Hero image carousel on mobile. level40.css shows the pills two-at-a-time
+ * (flex: 0 0 49%, and 67% under 560px), so on a phone two ovals appear side by
+ * side, both cut off. Show exactly one centred image per swipe instead — still
+ * the same scroll-snap carousel, just one slide wide. The min(...) width caps
+ * the oval on wide tablets so it never becomes a full-viewport column.
+ */
+@media (max-width: 960px) {
+  .l40-hero-pills {
+    gap: 0;
+    padding-inline: 0;
+  }
+
+  .l40-hero-pills .l40-pill {
+    flex: 0 0 100%;
+    max-width: 100%;
+    scroll-snap-align: center;
+  }
+
+  .l40-hero-pills .l40-pill-img {
+    width: min(72%, 290px);
+    margin-inline: auto;
+    min-height: 0;
+    aspect-ratio: 0.56 / 1;
+  }
+}
 .co-panel .os-qty {
   color: var(--cocoa);
 }

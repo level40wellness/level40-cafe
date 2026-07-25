@@ -16,7 +16,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx --conditions=react-server --env-file-if-exists=.env --env-file-if-exists=.env.local src/db/seed.ts",
-    "db:import-catalog": "tsx --conditions=react-server --env-file-if-exists=.env --env-file-if-exists=.env.local src/db/import-catalog.ts"
+    "db:import-catalog": "tsx --conditions=react-server --env-file-if-exists=.env --env-file-if-exists=.env.local src/db/import-catalog.ts",
+    "db:migrate-images": "tsx --conditions=react-server --env-file-if-exists=.env --env-file-if-exists=.env.local src/db/migrate-image.ts"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.6.23",

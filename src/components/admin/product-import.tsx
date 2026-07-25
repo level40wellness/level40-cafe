@@ -4,8 +4,16 @@ import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Download, FileSpreadsheet, Upload } from "lucide-react";
 
-import { importProductsAction, type ImportReport } from "@/server/actions/admin/import";
+import {
+  importProductsAction,
+  type ImportReport,
+} from "@/server/actions/admin/import";
 import { Modal } from "./modal";
+import { importMenuAction } from "@/server/actions/admin/menu-import";
+
+interface Kind {
+  kind: string;
+}
 
 /**
  * Retail-only toolbar: download a blank template, export the current catalogue
@@ -13,32 +21,57 @@ import { Modal } from "./modal";
  * manager. Export/template are plain links to the admin GET route; only the
  * upload needs a dialog.
  */
-export function ProductImportBar() {
+export function ProductImportBar({ kind }: Kind) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
       <a
         className="a-btn ghost"
-        href="/api/admin/products/export?template=1"
+        href={
+          kind === "cafe"
+            ? "/api/admin/menus/export?template=1"
+            : "/api/admin/products/export?template=1"
+        }
         download
       >
         <FileSpreadsheet size={15} aria-hidden="true" /> Template
       </a>
-      <a className="a-btn ghost" href="/api/admin/products/export" download>
+      <a
+        className="a-btn ghost"
+        href={
+          kind === "cafe"
+            ? "/api/admin/menus/export"
+            : "/api/admin/products/export"
+        }
+        download
+      >
         <Download size={15} aria-hidden="true" /> Export
       </a>
-      <button type="button" className="a-btn ghost" onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className="a-btn ghost"
+        onClick={() => setOpen(true)}
+      >
         <Upload size={15} aria-hidden="true" /> Import CSV
       </button>
-      {open && <ImportDialog onClose={() => setOpen(false)} />}
+      {open && <ImportDialog onClose={() => setOpen(false)} kind={kind} />}
     </>
   );
 }
 
-function ImportDialog({ onClose }: { onClose: () => void }) {
+function ImportDialog({
+  onClose,
+  kind,
+}: {
+  onClose: () => void;
+  kind: string;
+}) {
   const router = useRouter();
-  const [report, action, pending] = useActionState(importProductsAction, null);
+  const [report, action, pending] = useActionState(
+    kind === "cafe" ? importMenuAction : importProductsAction,
+    null,
+  );
 
   const changed =
     report?.ok === true &&
@@ -52,14 +85,24 @@ function ImportDialog({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <Modal wide title="Import products" subtitle="Retail shop" onClose={handleClose}>
+    <Modal
+      wide
+      title="Import menu items"
+      subtitle={kind === "cafe" ? "Menu Options" : "Retail shop"}
+      onClose={handleClose}
+    >
       <form action={action} className="a-stack">
         <p className="muted" style={{ lineHeight: 1.5 }}>
           Upload a CSV in the template format. Rows are matched by{" "}
           <strong>SKU</strong> — an existing SKU updates that product, a new one
-          adds it. Category paths like <code>Mats &gt; Jute Mats</code> are created
-          automatically if missing. A blank <em>Images</em> cell leaves existing
-          photos untouched.
+          adds it. Category paths like{" "}
+          <code>
+            {kind === "cafe"
+              ? "Breakfast > Salads & Soups"
+              : "Mats > Jute Mats"}
+          </code>{" "}
+          are created automatically if missing. A blank <em>Images</em> cell
+          leaves existing photos untouched.
         </p>
 
         <input
@@ -101,7 +144,14 @@ function ImportSummary({ report }: { report: ImportReport }) {
         gap: ".6rem",
       }}
     >
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "1.2rem", fontWeight: 600 }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "1.2rem",
+          fontWeight: 600,
+        }}
+      >
         <span>Added: {report.created}</span>
         <span>Updated: {report.updated}</span>
         {report.categoriesCreated > 0 && (
@@ -136,9 +186,12 @@ function ImportSummary({ report }: { report: ImportReport }) {
         </div>
       )}
 
-      {report.created + report.updated === 0 && report.rowErrors.length === 0 && (
-        <p className="muted">Nothing to import — the file had no product rows.</p>
-      )}
+      {report.created + report.updated === 0 &&
+        report.rowErrors.length === 0 && (
+          <p className="muted">
+            Nothing to import — the file had no product rows.
+          </p>
+        )}
     </div>
   );
 }

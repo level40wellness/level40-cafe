@@ -29,6 +29,13 @@
       "when": 1784948448382,
       "tag": "0003_neat_jean_grey",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784982011455,
+      "tag": "0004_light_purple_man",
+      "breakpoints": true
     }
   ]
 }

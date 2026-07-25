@@ -155,3 +155,11 @@ export function splitPipes(cell: string | undefined | null): string[] {
     .map((part) => part.trim())
     .filter(Boolean);
 }
+
+export function splitCommas(cell: string | undefined | null): string[] {
+  if (!cell) return [];
+  return cell
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+}

@@ -24,6 +24,17 @@ export const PRODUCT_CSV_COLUMNS = [
   "Sort order",
 ] as const;
 
+export const MENU_CSV_COLUMNS = [
+  "SKU",
+  "Item Name",
+  "Category",
+  "Price (AED)",
+  "Description",
+  "Images",
+  "In stock",
+  "Published",
+] as const;
+
 /**
  * A case- and whitespace-insensitive accessor over one parsed row, so a header
  * typed "price (aed)" or " SKU " still resolves. Returns "" for a missing
@@ -110,8 +121,28 @@ export function parseSizeOptions(cell: string): string[] {
   return sizes;
 }
 
-const TRUE = new Set(["yes", "y", "true", "1", "on", "published", "visible", "in stock", "instock"]);
-const FALSE = new Set(["no", "n", "false", "0", "off", "hidden", "draft", "out", "out of stock"]);
+const TRUE = new Set([
+  "yes",
+  "y",
+  "true",
+  "1",
+  "on",
+  "published",
+  "visible",
+  "in stock",
+  "instock",
+]);
+const FALSE = new Set([
+  "no",
+  "n",
+  "false",
+  "0",
+  "off",
+  "hidden",
+  "draft",
+  "out",
+  "out of stock",
+]);
 
 /** Lenient yes/no reading; an empty or unrecognised cell falls back. */
 export function parseBool(cell: string, fallback: boolean): boolean {
@@ -130,7 +161,10 @@ export function parseBool(cell: string, fallback: boolean): boolean {
  * so what the sheet says is what gets stored. Mirrors the single-product form.
  */
 export function parseAedToFils(input: string): number | null {
-  const trimmed = input.trim().replace(/^AED\s*/i, "").replace(/,/g, "");
+  const trimmed = input
+    .trim()
+    .replace(/^AED\s*/i, "")
+    .replace(/,/g, "");
   if (!/^\d{1,7}(\.\d{1,2})?$/.test(trimmed)) return null;
 
   const [dirhams, fils = ""] = trimmed.split(".");

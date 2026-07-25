@@ -124,7 +124,9 @@ export function ProductManager({
           },
           {
             label: "No image",
-            value: String(items.filter((item) => item.images.length === 0).length),
+            value: String(
+              items.filter((item) => item.images.length === 0).length,
+            ),
             meta: "Renders as a placeholder",
           },
         ]}
@@ -159,7 +161,7 @@ export function ProductManager({
           </button>
         )}
         {/* Bulk CSV upload/export is retail-only; the café menu is edited by hand. */}
-        {!isCafe && <ProductImportBar />}
+        <ProductImportBar kind={kind} />
         <button
           type="button"
           className="a-btn primary"
@@ -173,7 +175,8 @@ export function ProductManager({
       {categories.length === 0 && (
         <p className="a-error-summary" style={{ marginBottom: "1.2rem" }}>
           There are no {isCafe ? "café" : "retail"} categories yet. Create one
-          first — every {noun} has to belong to a category to appear on the site.
+          first — every {noun} has to belong to a category to appear on the
+          site.
         </p>
       )}
 
@@ -244,11 +247,21 @@ export function ProductManager({
                   <td>{item.categoryName ?? "—"}</td>
                   <td className="right num">{formatFils(item.priceFils)}</td>
                   <td>
-                    <div style={{ display: "flex", gap: ".35rem", flexWrap: "wrap" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: ".35rem",
+                        flexWrap: "wrap",
+                      }}
+                    >
                       <button
                         type="button"
                         className={`a-badge ${item.active ? "active" : "cancelled"}`}
-                        style={{ marginLeft: 0, cursor: "pointer", border: "none" }}
+                        style={{
+                          marginLeft: 0,
+                          cursor: "pointer",
+                          border: "none",
+                        }}
                         disabled={flag.pending}
                         title={item.active ? "Hide from the site" : "Publish"}
                         onClick={() => toggleFlag(item, "active")}
@@ -342,7 +355,11 @@ function ProductDialog({
 
         <FormError message={form.formError} />
 
-        <Field label="Name" htmlFor="product-name" error={form.fieldErrors?.name}>
+        <Field
+          label="Name"
+          htmlFor="product-name"
+          error={form.fieldErrors?.name}
+        >
           <input
             id="product-name"
             name="name"
@@ -380,9 +397,7 @@ function ProductDialog({
               className="a-input"
               inputMode="decimal"
               placeholder="42.50"
-              defaultValue={
-                product ? (product.priceFils / 100).toFixed(2) : ""
-              }
+              defaultValue={product ? (product.priceFils / 100).toFixed(2) : ""}
               aria-invalid={Boolean(form.fieldErrors?.price)}
               required
             />
@@ -430,7 +445,11 @@ function ProductDialog({
             />
           </Field>
 
-          <Field label="Tags" htmlFor="product-tags" error={form.fieldErrors?.tags}>
+          <Field
+            label="Tags"
+            htmlFor="product-tags"
+            error={form.fieldErrors?.tags}
+          >
             <input
               id="product-tags"
               name="tags"
@@ -461,7 +480,11 @@ function ProductDialog({
             just the choices a customer picks — separated by | like the CSV. */}
         {!isCafe && (
           <div className="a-grid-2">
-            <Field label="Sizes" htmlFor="product-sizes" error={form.fieldErrors?.sizes}>
+            <Field
+              label="Sizes"
+              htmlFor="product-sizes"
+              error={form.fieldErrors?.sizes}
+            >
               <input
                 id="product-sizes"
                 name="sizes"
@@ -480,7 +503,9 @@ function ProductDialog({
                 id="product-colors"
                 name="colors"
                 className="a-input"
-                defaultValue={product ? formatColorOptions(product.colorOptions) : ""}
+                defaultValue={
+                  product ? formatColorOptions(product.colorOptions) : ""
+                }
                 placeholder="Black:#000000 | Blue:#0066bf | Cream"
               />
             </Field>
@@ -512,7 +537,11 @@ function ProductDialog({
           <button type="button" className="a-btn ghost" onClick={onClose}>
             Cancel
           </button>
-          <button type="submit" className="a-btn primary" disabled={form.pending}>
+          <button
+            type="submit"
+            className="a-btn primary"
+            disabled={form.pending}
+          >
             {form.pending ? "Saving…" : "Save"}
           </button>
         </div>

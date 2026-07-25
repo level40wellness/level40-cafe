@@ -42,7 +42,10 @@ export const categories = pgTable(
     updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex("categories_slug_kind_uniq").on(sql`lower(${table.slug})`, table.kind),
+    uniqueIndex("categories_slug_kind_uniq").on(
+      sql`lower(${table.slug})`,
+      table.kind,
+    ),
     index("categories_parent_id_idx").on(table.parentId),
   ],
 );
@@ -70,7 +73,9 @@ export const products = pgTable(
     name: text().notNull(),
     description: text(),
     priceFils: integer().default(0).notNull(),
-    categoryId: uuid().references(() => categories.id, { onDelete: "set null" }),
+    categoryId: uuid().references(() => categories.id, {
+      onDelete: "set null",
+    }),
     /**
      * Stable business key for bulk CSV import: a matching SKU updates the row,
      * a new one inserts. Nullable because café menu items have none — Postgres
@@ -78,6 +83,7 @@ export const products = pgTable(
      * unique index below.
      */
     sku: text(),
+    ingredients: text(),
     // Menu-specific presentation, previously only in the static file.
     tags: text().array().default([]).notNull(),
     emoji: text(),
@@ -132,6 +138,15 @@ export const mealPlans = pgTable("meal_plans", {
   active: boolean().default(true).notNull(),
   sortOrder: integer().default(0).notNull(),
   createdBy: text().references(() => user.id, { onDelete: "set null" }),
+  createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
+});
+
+export const imageAssets = pgTable("image_assets", {
+  id: uuid().primaryKey().defaultRandom(),
+  originalName: text().notNull().unique(),
+  url: text().notNull(),
+  key: text().notNull(),
   createdAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
 });

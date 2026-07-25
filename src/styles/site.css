@@ -18,6 +18,40 @@
 .co-panel .os-line {
   color: var(--espresso);
 }
+
+/*
+ * Shop cards. level40.css lays .prod out as a plain block, so the price/action
+ * row sat directly under each description and floated at a different height on
+ * every card. And .add is white-space:nowrap with wide letter-spacing, so the
+ * longer "Choose options" label (added for products with Size/Colour options)
+ * overran the card — which is overflow:hidden, so it was being clipped at the
+ * edge. Make each card a flex column, pin the row to the bottom so it lines up
+ * across the grid, and let the action label fit instead of overflow.
+ */
+.shop-grid .prod {
+  display: flex;
+  flex-direction: column;
+}
+
+.shop-grid .prod .info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.shop-grid .prod .info .row {
+  margin-top: auto;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.shop-grid .prod .info .row .add {
+  letter-spacing: 0.1em;
+  padding: 0.62rem 0.95rem;
+  white-space: normal;
+  min-width: 0;
+}
 .co-panel .os-qty {
   color: var(--cocoa);
 }

@@ -6,6 +6,7 @@ import {
   Tags,
   UtensilsCrossed,
   Users,
+  UserCircle,
 } from "lucide-react";
 
 /**
@@ -22,6 +23,7 @@ export const ADMIN_NAV = [
   { href: "/admin/categories", label: "Categories", icon: Tags },
   { href: "/admin/meal-plans", label: "Meal Plans", icon: Repeat },
   { href: "/admin/users", label: "Users & Admins", icon: Users },
+  { href: "/admin/customers", label: "customers", icon: UserCircle },
 ] as const;
 
 export type AdminNavItem = (typeof ADMIN_NAV)[number];

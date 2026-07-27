@@ -11,6 +11,8 @@ import {
   userRole,
 } from "@/db/schema";
 import { auth } from "@/server/auth";
+import { customers } from "./schema/customer";
+import { CUSTOMER_SEED } from "./customer-seed";
 
 /**
  * Seeds the catalog the source app kept in static TypeScript files, plus the
@@ -632,6 +634,29 @@ async function seedAdmin() {
   console.log("");
 }
 
+async function seedCustomers() {
+  await db
+    .insert(customers)
+    .values(
+      CUSTOMER_SEED.map((customer) => ({
+        name: customer.name,
+        username: customer.username,
+        email: customer.email,
+        country: customer.country,
+        city: customer.city,
+        state: customer.state,
+        postcode: customer.postcode,
+        dateRegistered: customer.dateRegistered,
+        lastActive: customer.lastActive,
+        lastOrder: customer.lastOrder,
+        ordersCount: customer.ordersCount,
+        totalSpend: customer.totalSpend,
+        averageOrderValue: customer.averageOrderValue,
+      })),
+    )
+    .onConflictDoNothing();
+}
+
 async function main() {
   const categoryIds = await seedCategories();
   console.log(`categories : ${categoryIds.size}`);
@@ -663,6 +688,7 @@ async function main() {
   }
 
   await seedAdmin();
+  await seedCustomers();
 }
 
 main().catch((error) => {

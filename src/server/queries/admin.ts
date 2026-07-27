@@ -16,6 +16,7 @@ import {
 } from "@/db/schema";
 import type { ColorOption } from "@/db/schema";
 import { requireAdmin } from "@/server/guards";
+import { customers } from "@/db/schema/customer";
 
 /**
  * Admin reads. Separate from queries/catalog.ts because these deliberately
@@ -56,9 +57,8 @@ export async function getOverviewStats(): Promise<OverviewStats> {
           sql<number>`count(*) filter (where ${orders.status} = 'pending_payment')`.mapWith(
             Number,
           ),
-        ordersToday: sql<number>`count(*) filter (where ${placedToday})`.mapWith(
-          Number,
-        ),
+        ordersToday:
+          sql<number>`count(*) filter (where ${placedToday})`.mapWith(Number),
         // Cancelled, refunded and failed orders are excluded — takings, not gross.
         revenueTodayFils: sql<number>`coalesce(sum(${orders.totalFils}) filter (
           where ${placedToday}
@@ -69,7 +69,9 @@ export async function getOverviewStats(): Promise<OverviewStats> {
     db
       .select({
         activeProducts:
-          sql<number>`count(*) filter (where ${products.active})`.mapWith(Number),
+          sql<number>`count(*) filter (where ${products.active})`.mapWith(
+            Number,
+          ),
         hiddenProducts:
           sql<number>`count(*) filter (where not ${products.active})`.mapWith(
             Number,
@@ -107,10 +109,16 @@ export async function getAdminCategories() {
     .from(categories)
     .leftJoin(products, eq(products.categoryId, categories.id))
     .groupBy(categories.id)
-    .orderBy(asc(categories.kind), asc(categories.sortOrder), asc(categories.name));
+    .orderBy(
+      asc(categories.kind),
+      asc(categories.sortOrder),
+      asc(categories.name),
+    );
 }
 
-export type AdminCategory = Awaited<ReturnType<typeof getAdminCategories>>[number];
+export type AdminCategory = Awaited<
+  ReturnType<typeof getAdminCategories>
+>[number];
 
 export interface AdminProduct {
   id: string;
@@ -196,7 +204,9 @@ export async function getAdminMealPlans() {
     .orderBy(asc(mealPlans.sortOrder), asc(mealPlans.name));
 }
 
-export type AdminMealPlan = Awaited<ReturnType<typeof getAdminMealPlans>>[number];
+export type AdminMealPlan = Awaited<
+  ReturnType<typeof getAdminMealPlans>
+>[number];
 
 /** Categories an admin may assign a product of this kind to. */
 export async function getAssignableCategories(kind: "cafe" | "retail") {
@@ -329,7 +339,9 @@ export async function getAdminUsers() {
       email: user.email,
       emailVerified: user.emailVerified,
       createdAt: user.createdAt,
-      providers: sql<string[]>`coalesce(array_agg(distinct ${account.providerId}) filter (where ${account.providerId} is not null), '{}')`,
+      providers: sql<
+        string[]
+      >`coalesce(array_agg(distinct ${account.providerId}) filter (where ${account.providerId} is not null), '{}')`,
       lastSeenAt: sql<Date | null>`max(${session.createdAt})`,
       isAdmin: sql<boolean>`bool_or(${userRole.role} = 'admin')`,
     })
@@ -346,6 +358,30 @@ export async function getAdminUsers() {
 
 export type AdminUserRow = Awaited<ReturnType<typeof getAdminUsers>>[number];
 
+//customer details
+export async function getCustomersData() {
+  const rows = await db
+    .select({
+      id: customers.id,
+      name: customers.name,
+      username: customers.username,
+      email: customers.email,
+      country: customers.country,
+      city: customers.city,
+      state: customers.state,
+      postalCode: customers.postcode,
+      dateRegistered: customers.dateRegistered,
+      lastActive: customers.lastActive,
+      orderCount: customers.ordersCount,
+    })
+    .from(customers)
+    .orderBy(desc(customers.dateRegistered));
+
+  return rows;
+}
+
+export type CustomerData = Awaited<ReturnType<typeof getCustomersData>>[number];
+
 /** Full detail for one order, including its payment attempts. */
 export async function getAdminOrderById(id: string) {
   await requireAdmin();
@@ -354,7 +390,11 @@ export async function getAdminOrderById(id: string) {
     where: eq(orders.id, id),
     with: {
       items: true,
-      payments: { orderBy: (payment, { desc: descending }) => [descending(payment.createdAt)] },
+      payments: {
+        orderBy: (payment, { desc: descending }) => [
+          descending(payment.createdAt),
+        ],
+      },
     },
   });
 

@@ -30,6 +30,7 @@ export interface ProductSummary {
   images: string[];
   categoryName: string | null;
   categorySlug: string | null;
+  ingredients: string | null;
 }
 
 export interface CategoryWithProducts {
@@ -61,6 +62,7 @@ function toSummary(row: ProductRow): ProductSummary {
     images: sorted.map((image) => image.path),
     categoryName: row.category?.name ?? null,
     categorySlug: row.category?.slug ?? null,
+    ingredients: row.ingredients,
   };
 }
 
@@ -84,7 +86,9 @@ async function getProductsByKind(kind: "cafe" | "retail") {
     orderBy: [asc(products.sortOrder), asc(products.name)],
     with: {
       images: { columns: { path: true, sortOrder: true } },
-      category: { columns: { name: true, slug: true, kind: true, active: true } },
+      category: {
+        columns: { name: true, slug: true, kind: true, active: true },
+      },
     },
   });
 
@@ -130,7 +134,11 @@ export async function getShopCategories() {
 
   return rows
     .filter((category) => category.active)
-    .map((category) => ({ id: category.id, name: category.name, slug: category.slug }));
+    .map((category) => ({
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+    }));
 }
 
 /**
@@ -150,7 +158,9 @@ export async function getProductById(
     where: eq(products.id, id),
     with: {
       images: { columns: { path: true, sortOrder: true } },
-      category: { columns: { name: true, slug: true, kind: true, active: true } },
+      category: {
+        columns: { name: true, slug: true, kind: true, active: true },
+      },
     },
   });
 

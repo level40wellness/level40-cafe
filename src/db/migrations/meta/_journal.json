@@ -36,6 +36,13 @@
       "when": 1784982011455,
       "tag": "0004_light_purple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1785041357657,
+      "tag": "0005_silly_lenny_balinger",
+      "breakpoints": true
     }
   ]
 }

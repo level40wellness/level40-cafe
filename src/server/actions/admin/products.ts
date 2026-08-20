@@ -39,6 +39,11 @@ const productSchema = z.object({
   categoryId: z.uuid("Choose a category."),
   emoji: z.string().trim().max(8).optional(),
   tags: z.string().trim().max(300).optional(),
+  nutrition: z
+    .string()
+    .trim()
+    .max(300, "Keep the nutrition line under 300 characters.")
+    .optional(),
   sizes: z.string().trim().max(400).optional(),
   colors: z.string().trim().max(800).optional(),
   sortOrder: z.coerce.number().int().min(0).max(9999).default(0),
@@ -67,6 +72,7 @@ function parse(formData: FormData) {
     categoryId: formData.get("categoryId"),
     emoji: formData.get("emoji") || undefined,
     tags: formData.get("tags") || undefined,
+    nutrition: formData.get("nutrition") || undefined,
     sizes: formData.get("sizes") || undefined,
     colors: formData.get("colors") || undefined,
     sortOrder: formData.get("sortOrder") || 0,
@@ -172,6 +178,7 @@ export async function createProductAction(
         categoryId: parsed.data.categoryId,
         emoji: parsed.data.emoji ?? null,
         tags: splitTags(parsed.data.tags),
+        nutrition: parsed.data.nutrition ?? null,
         sizeOptions: parseSizeOptions(parsed.data.sizes ?? ""),
         colorOptions: parseColorOptions(parsed.data.colors ?? ""),
         sortOrder: parsed.data.sortOrder,
@@ -236,6 +243,7 @@ export async function updateProductAction(
         categoryId: parsed.data.categoryId,
         emoji: parsed.data.emoji ?? null,
         tags: splitTags(parsed.data.tags),
+        nutrition: parsed.data.nutrition ?? null,
         sizeOptions: parseSizeOptions(parsed.data.sizes ?? ""),
         colorOptions: parseColorOptions(parsed.data.colors ?? ""),
         sortOrder: parsed.data.sortOrder,

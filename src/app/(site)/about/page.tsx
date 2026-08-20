@@ -6,7 +6,8 @@ import { HERO_IMG } from "@/lib/images";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "The story behind Level 40 — a modern Arabian café in Dubai.",
+  description:
+    "The story behind Level 40 — UAE's first wellness-integrated café, bringing healthy dining, meal plans, yoga and wellness retail together in Dubai.",
   alternates: { canonical: "/about" },
 };
 
@@ -22,11 +23,12 @@ export default function AboutPage() {
         <div className="inner">
           <span className="eyebrow center">Our Story</span>
           <h1>
-            A love letter <em>to the table.</em>
+            More than <em>a café.</em>
           </h1>
           <p>
-            Level 40 was born in 2021 from a simple idea: bring the warmth of an
-            Arabian family table into a modern, design-led café.
+            Level 40 was born from a simple belief: wellness should come
+            together, not be fragmented — one destination for how you eat,
+            move and live.
           </p>
         </div>
       </section>
@@ -36,23 +38,27 @@ export default function AboutPage() {
           className="imgcol"
           style={{ backgroundImage: `url('${HERO_IMG.interior}')` }}
         >
-          <span className="tag">Founded in Downtown Dubai, 2021</span>
+          <span className="tag">Continents Tower, JVC, Dubai</span>
         </div>
         <div className="txtcol reveal">
-          <span className="eyebrow">Built around hospitality</span>
-          <h2>A conversation between the kitchen, the room and the guest.</h2>
+          <span className="eyebrow">Built around balance</span>
+          <h2>One destination for modern wellness.</h2>
           <p>
-            Founded in Downtown Dubai, our café celebrates the produce, spices
-            and rhythms of the region — reimagined through modern technique and
-            an unwavering eye for craft.
+            Most of us don&apos;t struggle with wellness for lack of
+            information — the pieces are simply scattered. Level 40 brings them
+            under one roof: a high-protein vegetarian kitchen and specialty
+            coffee bar, nutritionist-guided and biomarker-informed meal plans,
+            holistic yoga, and NEAT by Nicky wellness retail.
           </p>
           <p>
-            From the saffron we grind each morning to the marble we chose for our
-            tables, every detail is considered. Whether you scan a QR code at
-            your table or pick up a meal on your way home, you are part of the
-            table we set every day.
+            Every menu, programme and product is developed with
+            evidence-informed nutrition principles and a practical approach to
+            healthy living — progress over perfection, balance over extremes,
+            and habits that survive real life. Come for your morning coffee,
+            stay for a nourishing meal, join a workshop, or simply enjoy the
+            space.
           </p>
-          <div className="sig">— Warmth, in every detail</div>
+          <div className="sig">— Eat Well. Move Well. Live Well.</div>
         </div>
       </section>
 
@@ -66,44 +72,44 @@ export default function AboutPage() {
             <div className="way reveal">
               <div className="num">01</div>
               <div className="ln" />
-              <h3>Seasonal &amp; local</h3>
+              <h3>Science-backed nutrition</h3>
               <p>
-                We cook with the region&apos;s finest produce, at the peak of its
-                season.
+                Evidence-informed, biomarker-guided plans and menus — with
+                real-world practicality, not fads.
               </p>
             </div>
             <div className="way reveal">
               <div className="num">02</div>
               <div className="ln" />
-              <h3>Craft over shortcuts</h3>
+              <h3>Made fresh, made honest</h3>
               <p>
-                Hand-ground spices, slow-cooked mains, and pastry made in-house
-                daily.
+                High-protein vegetarian food and specialty coffee, crafted
+                daily from premium ingredients.
               </p>
             </div>
             <div className="way reveal">
               <div className="num">03</div>
               <div className="ln" />
-              <h3>Effortless hospitality</h3>
+              <h3>Balance over extremes</h3>
               <p>
-                Ordering as quiet and easy as a conversation — scan, order,
-                relax.
+                Designed around balance, not restriction — sustainable habits
+                for everyday life.
               </p>
             </div>
           </div>
 
           <div className="stats reveal">
             <div className="stat">
-              <b>2021</b>
-              <span>Founded in Downtown Dubai</span>
+              <b>100%</b>
+              <span>Vegetarian, high-protein focused</span>
             </div>
             <div className="stat">
-              <b>12+</b>
-              <span>Awarded dishes on the menu</span>
+              <b>One</b>
+              <span>Integrated wellness destination</span>
             </div>
             <div className="stat">
-              <b>98%</b>
-              <span>Guests return within 60 days</span>
+              <b>Countless</b>
+              <span>Everyday transformations</span>
             </div>
           </div>
         </div>
@@ -116,11 +122,12 @@ export default function AboutPage() {
         <div className="wrap">
           <div className="card reveal">
             <span className="eyebrow">Come and see</span>
-            <h2>The room was made for lingering.</h2>
+            <h2>A space made for wellness — and for lingering.</h2>
             <p>
-              Deep emerald banquettes, hand-poured brass lights, and a soundtrack
-              tuned for unhurried conversation. Stay for a coffee. Stay for the
-              evening.
+              Beautiful spaces you&apos;ll actually want to spend time in.
+              Stop by for your morning coffee, stay for a nourishing meal,
+              join a yoga session or a workshop — and leave a little better
+              than you arrived.
             </p>
             <Link href="/contact" className="btn btn-gold">
               Reserve a table

@@ -26,17 +26,25 @@ const ACCEPTED = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 export function ImageUploader({
   value,
   onChange,
+  max = MAX_IMAGES,
+  label = "Images — the first is used as the thumbnail",
 }: {
   value: DraftImage[];
   onChange: (next: DraftImage[]) => void;
+  /** Cap on how many images this form accepts; defaults to the product limit. */
+  max?: number;
+  label?: string;
 }) {
   const [busy, setBusy] = useState(false);
 
   async function handleFiles(fileList: FileList) {
-    const remaining = MAX_IMAGES - value.length;
+    // With a single-image cap the next upload replaces the current photo
+    // rather than being refused — "change the photo" is the common edit.
+    const replacing = max === 1;
+    const remaining = replacing ? 1 : max - value.length;
 
     if (remaining <= 0) {
-      toast.error(`A product can have at most ${MAX_IMAGES} images.`);
+      toast.error(`At most ${max} image${max === 1 ? "" : "s"} here.`);
       return;
     }
 
@@ -65,7 +73,8 @@ export function ImageUploader({
         ),
       );
 
-      onChange([...value, ...uploaded.map((blob) => ({ path: blob.url }))]);
+      const added = uploaded.map((blob) => ({ path: blob.url }));
+      onChange(replacing ? added : [...value, ...added]);
       toast.success(
         `${uploaded.length} image${uploaded.length === 1 ? "" : "s"} uploaded.`,
       );
@@ -87,9 +96,7 @@ export function ImageUploader({
 
   return (
     <div className="a-field">
-      <span className="a-field-label">
-        Images — the first is used as the thumbnail
-      </span>
+      <span className="a-field-label">{label}</span>
 
       {value.length > 0 && (
         <div className="a-img-grid">
@@ -136,13 +143,19 @@ export function ImageUploader({
 
       <label className={`a-btn ghost${busy ? " is-busy" : ""}`} style={{ cursor: "pointer" }}>
         <Upload size={15} aria-hidden="true" />
-        {busy ? "Uploading…" : `Add images (${value.length}/${MAX_IMAGES})`}
+        {busy
+          ? "Uploading…"
+          : max === 1
+            ? value.length > 0
+              ? "Replace photo"
+              : "Add photo"
+            : `Add images (${value.length}/${max})`}
         <input
           type="file"
           accept={ACCEPTED.join(",")}
-          multiple
+          multiple={max > 1}
           hidden
-          disabled={busy || value.length >= MAX_IMAGES}
+          disabled={busy || (max > 1 && value.length >= max)}
           onChange={(event) => {
             if (event.target.files) void handleFiles(event.target.files);
             // Allows re-selecting the same file after a removal.

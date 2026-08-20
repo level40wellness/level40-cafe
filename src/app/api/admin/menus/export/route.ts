@@ -28,6 +28,7 @@ const EXAMPLE_ROW = [
   "Breakfast > Salads & Soups",
   "25",
   "A short description shown on the product page.",
+  "420 kcal, 32g protein, 38g carbs, 9g fibre",
   "https://example.com/photo-1.jpg | https://example.com/photo-2.jpg",
   "yes",
   "no",
@@ -110,6 +111,7 @@ async function buildRows(): Promise<string[][]> {
       pathFor(row.categoryId),
       formatFilsToAed(row.priceFils),
       row.description ?? "",
+      row.nutrition ?? "",
       [...row.images]
         .sort((a, b) => a.sortOrder - b.sortOrder)
         .map((image) => image.path)

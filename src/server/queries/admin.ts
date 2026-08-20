@@ -129,6 +129,7 @@ export interface AdminProduct {
   categoryName: string | null;
   tags: string[];
   emoji: string | null;
+  nutrition: string | null;
   sizeOptions: string[];
   colorOptions: ColorOption[];
   inStock: boolean;
@@ -170,6 +171,7 @@ export async function getAdminProducts(
       categoryName: row.category?.name ?? null,
       tags: row.tags,
       emoji: row.emoji,
+      nutrition: row.nutrition,
       sizeOptions: row.sizeOptions,
       colorOptions: row.colorOptions,
       inStock: row.inStock,

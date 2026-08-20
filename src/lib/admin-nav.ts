@@ -1,6 +1,8 @@
 import {
   ClipboardList,
+  Contact,
   LayoutDashboard,
+  Newspaper,
   Repeat,
   ShoppingBag,
   Tags,
@@ -22,6 +24,8 @@ export const ADMIN_NAV = [
   { href: "/admin/shop", label: "Retail Shop", icon: ShoppingBag },
   { href: "/admin/categories", label: "Categories", icon: Tags },
   { href: "/admin/meal-plans", label: "Meal Plans", icon: Repeat },
+  { href: "/admin/team", label: "Team", icon: Contact },
+  { href: "/admin/blog", label: "Blog", icon: Newspaper },
   { href: "/admin/users", label: "Users & Admins", icon: Users },
   { href: "/admin/customers", label: "customers", icon: UserCircle },
 ] as const;

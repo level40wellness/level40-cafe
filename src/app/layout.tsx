@@ -43,11 +43,11 @@ const jost = Jost({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Level 40 — Modern Café in Dubai",
+    default: "Level 40 — Wellness Integrated Café in Dubai",
     template: "%s — Level 40",
   },
   description:
-    "Level 40 is a modern Dubai café — chef-driven Arabian cuisine, dine-in QR ordering, and pickup.",
+    "Level 40 is UAE's first wellness-integrated café — high-protein vegetarian dining, specialty coffee, nutritionist-guided meal plans, holistic yoga and curated wellness retail in one Dubai destination.",
   authors: [{ name: "Level 40 Café" }],
   openGraph: {
     type: "website",

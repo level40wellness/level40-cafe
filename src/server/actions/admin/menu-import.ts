@@ -42,7 +42,7 @@ const REQUIRED_HEADERS = [
   "Category",
   "Item Name",
   "Description",
-  "Ingredients",
+  "Nutrition",
   "Price (AED)",
   "Image Files",
 ];
@@ -212,7 +212,7 @@ export async function importMenuAction(
         //   }
         // }
 
-        const ingredients = get("Ingredients");
+        const nutrition = get("Nutrition");
 
         const categoryId = await resolveCategory(
           parseCategoryPath(get("Category")),
@@ -228,7 +228,7 @@ export async function importMenuAction(
           inStock: parseBool(get("In stock"), true),
           active: parseBool(get("Published"), true),
           sortOrder: parseSortOrder(get("Sort order")),
-          ingredients: ingredients ? ingredients.trim() : null,
+          nutrition: nutrition ? nutrition.trim() : null,
         };
 
         const existingId = sku ? productBySku.get(sku.toLowerCase()) : null;

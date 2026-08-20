@@ -30,7 +30,8 @@ export interface ProductSummary {
   images: string[];
   categoryName: string | null;
   categorySlug: string | null;
-  ingredients: string | null;
+  /** Comma-separated nutrition facts, shown as pills on the menu cards. */
+  nutrition: string | null;
 }
 
 export interface CategoryWithProducts {
@@ -62,7 +63,7 @@ function toSummary(row: ProductRow): ProductSummary {
     images: sorted.map((image) => image.path),
     categoryName: row.category?.name ?? null,
     categorySlug: row.category?.slug ?? null,
-    ingredients: row.ingredients,
+    nutrition: row.nutrition,
   };
 }
 

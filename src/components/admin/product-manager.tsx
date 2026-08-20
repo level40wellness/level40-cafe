@@ -385,6 +385,25 @@ function ProductDialog({
           />
         </Field>
 
+        {/* Nutrition pills are a menu-card feature; retail cards never show
+            them, so the shop editor hides the field. */}
+        {isCafe && (
+          <Field
+            label="Nutrition — comma separated, shown as pills on the menu"
+            htmlFor="product-nutrition"
+            error={form.fieldErrors?.nutrition}
+          >
+            <input
+              id="product-nutrition"
+              name="nutrition"
+              className="a-input"
+              defaultValue={product?.nutrition ?? ""}
+              placeholder="420 kcal, 32g protein, 38g carbs, 9g fibre"
+              maxLength={300}
+            />
+          </Field>
+        )}
+
         <div className="a-grid-2">
           <Field
             label="Price (AED)"

@@ -30,6 +30,7 @@ export const MENU_CSV_COLUMNS = [
   "Category",
   "Price (AED)",
   "Description",
+  "Nutrition",
   "Images",
   "In stock",
   "Published",

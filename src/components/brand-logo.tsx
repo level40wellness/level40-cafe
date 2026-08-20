@@ -11,7 +11,7 @@ type Props = {
  * deployment. The logo now ships in /public.
  */
 export function BrandLogo({ variant = "header", className }: Props) {
-  const height = variant === "footer" ? 80 : 48;
+  const height = variant === "footer" ? 80 : 64;
 
   return (
     <Link

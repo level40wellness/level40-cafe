@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  CalendarHeart,
   Coffee,
-  Gift,
-  QrCode,
+  Flower2,
+  Salad,
+  ShoppingBag,
   Truck,
   Utensils,
 } from "lucide-react";
@@ -12,40 +12,40 @@ import {
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Dine-in, QR table ordering, pickup, private events, gifting and catering.",
+    "Healthy dining, specialty coffee, pickup & delivery, nutritionist-guided meal plans, holistic yoga and NEAT by Nicky wellness retail — Level 40's services in Dubai.",
   alternates: { canonical: "/services" },
 };
 
 const SERVICES = [
   {
     icon: Utensils,
-    title: "Dine-In",
-    body: "Reserve a table in our marble-and-brass dining room. Lunch, dinner, late-night sweets.",
-  },
-  {
-    icon: QrCode,
-    title: "Scan & Order",
-    body: "Every table carries a QR code. Browse, customise and pay from your phone — no waiting.",
-  },
-  {
-    icon: Truck,
-    title: "Pickup",
-    body: "Order ahead from anywhere in Dubai. Ready in roughly 45 minutes, packaged with care.",
-  },
-  {
-    icon: CalendarHeart,
-    title: "Private Events",
-    body: "Buy out a corner or the whole room for birthdays, brand dinners and intimate weddings.",
+    title: "Healthy Dining",
+    body: "High-protein vegetarian breakfasts, power bowls and wholesome mains — dine in and order from the QR code at your table.",
   },
   {
     icon: Coffee,
-    title: "Coffee Programme",
-    body: "A small-batch coffee bar with Arabic gahwa, saffron karak and seasonal espresso.",
+    title: "Specialty Coffee",
+    body: "Thoughtfully sourced, expertly crafted — from your morning espresso to functional, wellness-inspired favourites.",
   },
   {
-    icon: Gift,
-    title: "Gifting & Hampers",
-    body: "Hand-built hampers of dates, sweets and spice tins for Ramadan, Eid and personal gifting.",
+    icon: Truck,
+    title: "Pickup & Delivery",
+    body: "Order ahead from anywhere in Dubai — call +971 56 454 8896 and your meal is packaged with care, ready when you are.",
+  },
+  {
+    icon: Salad,
+    title: "Nutritionist-Guided Meal Plans",
+    body: "Biomarker-informed programmes for Diabetes, Weight Management, PCOS, Cholesterol and Longevity — made fresh daily.",
+  },
+  {
+    icon: Flower2,
+    title: "Holistic Yoga",
+    body: "Guided yoga, mobility, breathwork and mindful movement, through personalized and group wellness experiences.",
+  },
+  {
+    icon: ShoppingBag,
+    title: "NEAT by Nicky Retail",
+    body: "A curated wellness retail experience — premium activewear, yoga essentials, accessories and lifestyle products.",
   },
 ] as const;
 
@@ -58,11 +58,11 @@ export default function ServicesPage() {
             Services
           </p>
           <h1 className="mt-3 font-display text-5xl text-balance sm:text-6xl">
-            Six ways to enjoy Level 40.
+            Six ways to live well at Level 40.
           </h1>
           <p className="mt-5 text-lg text-muted-foreground">
-            From a quiet espresso to a fifty-guest dinner — we are designed
-            around how Dubai wants to eat.
+            From a quiet espresso to a fully guided wellness programme — we are
+            designed around how Dubai wants to live well.
           </p>
         </div>
       </section>

@@ -74,7 +74,7 @@ img {
 }
 .eyebrow {
   font-family: var(--sans);
-  font-size: 0.68rem;
+  font-size: 1rem;
   letter-spacing: 0.42em;
   text-transform: uppercase;
   font-weight: 500;
@@ -160,6 +160,10 @@ header.nav.solid {
   align-items: center;
   justify-content: space-between;
   height: 84px;
+  /* Header only: span the full bar with slim gutters, so the logo sits hard
+     left and the menu/actions hard right. Body sections keep .wrap's 1220px. */
+  max-width: none;
+  padding: 0 18px;
 }
 .logo {
   font-family: var(--display);
@@ -183,7 +187,7 @@ header.nav.solid {
 }
 /* real logo image — tinted cream so it reads on dark bars */
 .logo-img {
-  height: 52px;
+  height: 64px;
   width: auto;
   display: block;
   filter: brightness(0) invert(1) sepia(0.28) saturate(1.6) hue-rotate(357deg)
@@ -508,7 +512,7 @@ section.block {
   font-weight: 300;
 }
 .sec-head p {
-  color: #6b5c4d;
+  color: #46362a;
   font-family: var(--serif);
   font-size: 1.25rem;
   font-style: italic;
@@ -538,6 +542,129 @@ section.block {
   font-style: italic;
   font-size: 1.1rem;
   border-top: 2px solid var(--gold);
+}
+.intro-carousel {
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+}
+.intro-carousel:active {
+  cursor: grabbing;
+}
+.ic-slide {
+  position: absolute;
+  inset: 0;
+  background: center/cover no-repeat;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.ic-slide.is-active {
+  opacity: 1;
+}
+/*
+ * Poster deck: one poster in full view, the rest stacked behind it like
+ * playing cards. Click/tap throws the top card away; swipe works on touch.
+ */
+.pp {
+  align-self: center;
+  min-width: 0;
+  padding: 3rem 1.5rem 1.75rem;
+}
+.deck {
+  position: relative;
+  width: min(100%, 460px);
+  aspect-ratio: 2 / 3;
+  /* Room on the right/top for the stacked cards peeking out. */
+  margin: 0 auto;
+  translate: -14px 0;
+  cursor: pointer;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.deck-card {
+  position: absolute;
+  inset: 0;
+  transform: translate(calc(var(--d) * 16px), calc(var(--d) * -12px))
+    rotate(calc(var(--d) * 1.6deg)) scale(calc(1 - var(--d) * 0.045));
+  transition:
+    transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1),
+    opacity 0.5s ease;
+  will-change: transform;
+}
+.deck-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 24px 48px -22px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+/* Top card flying off to the right, playing-card style. */
+.deck-card.is-leaving {
+  transform: translateX(130%) rotate(12deg);
+  opacity: 0;
+}
+.pp-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.55rem;
+  margin-top: 0.4rem;
+}
+.pp-dot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    transform 0.3s ease;
+}
+.pp-dot.is-active {
+  background: var(--gold);
+  transform: scale(1.25);
+}
+.ic-label {
+  position: absolute;
+  top: 1.3rem;
+  left: 1.3rem;
+  z-index: 2;
+  background: rgba(28, 18, 12, 0.72);
+  color: var(--cream);
+  padding: 0.55rem 1rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-family: var(--sans);
+  border-left: 2px solid var(--gold);
+}
+.ic-dots {
+  position: absolute;
+  bottom: 1.2rem;
+  right: 1.3rem;
+  z-index: 2;
+  display: flex;
+  gap: 0.5rem;
+}
+.ic-dot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+.ic-dot.is-active {
+  background: var(--gold);
+  transform: scale(1.25);
 }
 .intro .txtcol {
   padding: 5.5rem 5rem;
@@ -569,15 +696,15 @@ section.block {
 .ways {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
+  gap: 2.2rem 1.4rem;
 }
 .way {
   text-align: center;
-  padding: 1rem;
+  padding: 0.4rem;
 }
 .way .num {
   font-family: var(--serif);
-  font-size: 2.4rem;
+  font-size: 2.2rem;
   color: var(--gold);
   font-style: italic;
 }
@@ -585,21 +712,275 @@ section.block {
   width: 40px;
   height: 1px;
   background: var(--gold);
-  margin: 1rem auto 1.4rem;
+  margin: 0.6rem auto 0.9rem;
   opacity: 0.6;
 }
 .way h3 {
   font-size: 1.6rem;
   color: var(--espresso);
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.6rem;
   font-weight: 400;
 }
 .way p {
-  font-size: 0.96rem;
-  color: #6b5c4d;
-  font-weight: 300;
-  max-width: 20rem;
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: var(--cocoa);
+  font-weight: 400;
+  max-width: 22rem;
   margin: 0 auto;
+}
+.way .way-tags {
+  margin-top: 0.9rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--olive-deep);
+}
+
+/* ---- MEET THE TEAM ---- */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2.2rem 1.6rem;
+  justify-items: center;
+  margin-bottom: 3.5rem;
+}
+.team-card {
+  text-align: center;
+  max-width: 280px;
+}
+.team-photo {
+  width: 168px;
+  height: 168px;
+  margin: 0 auto 1.2rem;
+  border-radius: 50%;
+  background: var(--stone) center/cover no-repeat;
+  box-shadow:
+    0 22px 40px -22px rgba(44, 30, 20, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.team-card h3 {
+  font-size: 1.35rem;
+  color: var(--espresso);
+  font-weight: 400;
+  margin-bottom: 0.2rem;
+}
+.team-role {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-family: var(--sans);
+  margin-bottom: 0.7rem;
+}
+.team-card p {
+  font-size: 0.94rem;
+  line-height: 1.6;
+  color: var(--cocoa);
+  font-weight: 300;
+}
+
+/* ---- FLOATING WHATSAPP ---- */
+.wa-float {
+  position: fixed;
+  bottom: 1.6rem;
+  right: 1.6rem;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+  box-shadow: 0 14px 30px -10px rgba(18, 60, 30, 0.55);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.wa-float:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 20px 36px -12px rgba(18, 60, 30, 0.6);
+}
+@media (max-width: 760px) {
+  .wa-float {
+    bottom: 1.1rem;
+    right: 1.1rem;
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* ---- HOME JOURNAL ---- */
+.journal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.8rem;
+  margin-bottom: 3rem;
+}
+.journal-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid rgba(58, 46, 36, 0.08);
+  border-radius: 18px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 26px 50px -34px rgba(44, 30, 20, 0.4);
+  transition:
+    transform 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+.journal-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--gold);
+  box-shadow: 0 32px 56px -30px rgba(44, 30, 20, 0.45);
+}
+.journal-cover {
+  height: 250px;
+  background: var(--cream-2) center/cover no-repeat;
+}
+.journal-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 1.6rem 1.8rem 1.8rem;
+}
+.journal-meta {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cocoa);
+}
+.journal-tag {
+  color: var(--gold);
+}
+.journal-body h3 {
+  font-size: 1.55rem;
+  line-height: 1.25;
+  font-weight: 400;
+  color: var(--espresso);
+}
+.journal-body p {
+  flex: 1;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  font-weight: 300;
+  color: var(--cocoa);
+}
+.journal-read {
+  margin-top: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+/* /blog lists every post, so it trades the homepage pair for three-up. */
+.journal-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.journal-grid.three .journal-cover {
+  height: 210px;
+}
+.journal-grid.three .journal-body h3 {
+  font-size: 1.35rem;
+}
+.journal-empty {
+  text-align: center;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--cocoa);
+}
+
+/* ---- JOURNAL POST PAGE ---- */
+.journal-hero-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  margin-top: 1.4rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+}
+.journal-hero-meta i {
+  font-style: normal;
+  opacity: 0.7;
+}
+.journal-article {
+  max-width: 46rem;
+  margin: 0 auto 3rem;
+}
+.journal-article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.2rem;
+  margin-bottom: 2.2rem;
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.journal-article > p {
+  font-size: 1.08rem;
+  line-height: 1.85;
+  font-weight: 300;
+  color: var(--cocoa);
+  margin-bottom: 1.5rem;
+}
+.journal-article > p:first-of-type::first-letter {
+  font-family: var(--serif);
+  font-size: 3.2em;
+  line-height: 0.85;
+  float: left;
+  padding: 0.08em 0.12em 0 0;
+  color: var(--gold);
+}
+.journal-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+  margin-top: 2.4rem;
+}
+.journal-gallery-img {
+  height: 240px;
+  border-radius: 16px;
+  background: var(--cream-2) center/cover no-repeat;
+  box-shadow: 0 24px 44px -30px rgba(44, 30, 20, 0.45);
+}
+
+@media (max-width: 980px) {
+  .journal-grid.three {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .journal-grid,
+  .journal-grid.three {
+    grid-template-columns: 1fr;
+    gap: 1.4rem;
+  }
+  .journal-cover {
+    height: 200px;
+  }
+  .journal-gallery {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---- HOME MENU (image forward) ---- */
@@ -615,13 +996,13 @@ section.block {
 }
 .picks {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2.2rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.4rem;
 }
 .dish {
   position: relative;
   overflow: hidden;
-  min-height: 440px;
+  min-height: 400px;
   display: flex;
   align-items: flex-end;
   background: #3b2a1d center/cover no-repeat;
@@ -651,26 +1032,33 @@ section.block {
 .dish .body {
   position: relative;
   z-index: 2;
-  padding: 2.4rem;
+  padding: 1.6rem;
   width: 100%;
 }
 .dish .body h3 {
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   color: var(--cream);
   font-weight: 400;
   margin-bottom: 0.4rem;
 }
 .dish .body p {
-  font-size: 0.94rem;
+  font-size: 0.88rem;
   color: #dccbb2;
   font-weight: 300;
   max-width: 26rem;
+  /* Four cards share one row — keep long descriptions from stretching it. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .dish .row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 1.4rem;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1.1rem;
 }
 .price {
   font-family: var(--display);
@@ -808,27 +1196,47 @@ section.block {
 }
 
 /* ---- GALLERY ---- */
+/* A continuously drifting rail of brand photos, ~4 tiles in view. */
 .gallery {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  overflow: hidden;
+}
+.gallery-track {
+  display: flex;
+  width: max-content;
+  animation: galleryDrift 48s linear infinite;
+}
+.gallery:hover .gallery-track {
+  animation-play-state: paused;
 }
 .gallery .g {
+  flex: 0 0 auto;
+  width: 25vw;
   height: 280px;
+  /* Spacing lives on the tile, not the track: the -50% loop point is only
+     seamless when each half of the doubled list is exactly half the width. */
+  margin-right: 6px;
   background: #3b2a1d center/cover no-repeat;
-  transition: 0.6s;
+  transition: filter 0.6s;
   filter: saturate(0.95);
 }
 .gallery .g:hover {
   filter: saturate(1.1);
-  transform: scale(1.02);
-  z-index: 2;
+}
+/* Rendered twice for the loop; drifting right means starting half a list in. */
+@keyframes galleryDrift {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 /* ---- HOME MEAL PLAN ---- */
 .plan {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* The poster pager needs the wider half so neighbour edges can peek. */
+  grid-template-columns: 1.25fr 1fr;
   align-items: stretch;
   background: var(--olive-deep);
   color: var(--cream);
@@ -986,6 +1394,25 @@ section.block {
   border-color: var(--olive);
   color: var(--olive-deep);
 }
+/* Nutrition facts on the menu cards — one rounded pill per value. */
+.nutri-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+.nutri-pill {
+  font-family: var(--sans);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 0.32rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 168, 67, 0.45);
+  background: rgba(212, 168, 67, 0.1);
+  color: var(--olive-deep);
+}
 .m-card .foot {
   display: flex;
   justify-content: space-between;
@@ -994,12 +1421,223 @@ section.block {
 }
 
 /* ---- MEAL PLAN TIERS ---- */
+/* ---- MEAL PLAN PROCESS FLOW (snaking infographic) ---- */
+/* Each step's colour comes in via --fpc. The wrap element draws the path
+   that hugs the card — over the top for odd steps, under the bottom for
+   even ones — ending in an arrowhead that hooks toward the next step. */
+.fp-flow {
+  --fp-gap: 2.4rem;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: var(--fp-gap);
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+.fp-step {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 200px;
+  display: grid;
+  grid-template-rows: 72px minmax(96px, auto) 72px;
+}
+.fp-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fp-card {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  background: var(--cream-2);
+  border: 3px solid var(--fpc);
+  border-radius: 16px;
+  padding: 1rem 0.8rem;
+  text-align: center;
+  color: var(--fpc);
+  box-shadow: 0 16px 30px -22px rgba(44, 30, 20, 0.4);
+}
+.fp-card h4 {
+  font-family: var(--serif);
+  font-size: 1.02rem;
+  line-height: 1.3;
+  color: var(--espresso);
+  font-weight: 500;
+}
+/* Diamond number badge sitting on the path. */
+.fp-num {
+  position: relative;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--fpc);
+  transform: rotate(45deg);
+  border-radius: 6px;
+  box-shadow: 0 10px 20px -12px rgba(44, 30, 20, 0.55);
+}
+.fp-num i {
+  transform: rotate(-45deg);
+  font-style: normal;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--cream);
+}
+.fp-text {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ink);
+  font-weight: 400;
+  text-align: center;
+  max-width: 175px;
+}
+/* The snaking path + arrowhead. */
+.fp-wrap {
+  position: absolute;
+  left: -12px;
+  right: calc(-1 * var(--fp-gap) + 4px);
+  z-index: 1;
+  pointer-events: none;
+  border-left: 3px solid var(--fpc);
+}
+.fp-step.is-top .fp-wrap {
+  top: 36px;
+  height: 96px;
+  border-top: 3px solid var(--fpc);
+  border-top-left-radius: 26px;
+}
+.fp-step.is-bottom .fp-wrap {
+  bottom: 36px;
+  height: 96px;
+  border-bottom: 3px solid var(--fpc);
+  border-bottom-left-radius: 26px;
+}
+.fp-wrap::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 11px solid var(--fpc);
+}
+.fp-step.is-top .fp-wrap::after {
+  top: -8.5px;
+}
+.fp-step.is-bottom .fp-wrap::after {
+  bottom: -8.5px;
+}
+/* The last step's arrow has nowhere to hook — end it just past the card. */
+.fp-step:last-child .fp-wrap {
+  right: -16px;
+}
+@media (max-width: 1400px) {
+  /* Tighter weave before the layout gives up the horizontal band. */
+  .fp-flow {
+    --fp-gap: 1.5rem;
+  }
+  .fp-card {
+    padding: 0.9rem 0.6rem;
+  }
+  .fp-card h4 {
+    font-size: 0.92rem;
+  }
+  .fp-text {
+    font-size: 0.74rem;
+  }
+}
+@media (max-width: 1100px) {
+  /* Vertical chain: cards stack, the path work is hidden, arrows run down. */
+  .fp-flow {
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .fp-step {
+    max-width: 420px;
+    width: 100%;
+    grid-template-rows: none;
+  }
+  .fp-wrap {
+    display: none;
+  }
+  .fp-zone {
+    padding: 0.6rem 0;
+  }
+  .fp-step .fp-zone:first-child {
+    order: 1;
+  }
+  .fp-card {
+    order: 2;
+  }
+  .fp-step .fp-zone:last-of-type {
+    order: 3;
+  }
+  .fp-step + .fp-step::before {
+    content: "⟶";
+    display: block;
+    text-align: center;
+    transform: rotate(90deg);
+    color: var(--gold);
+    font-size: 1.6rem;
+    margin: 0.7rem auto;
+  }
+  /* Stacked cards have room again — undo the tight-weave shrink. */
+  .fp-card {
+    padding: 1.1rem 1rem;
+  }
+  .fp-card h4 {
+    font-size: 1.05rem;
+  }
+  .fp-text {
+    font-size: 0.82rem;
+    max-width: 300px;
+  }
+}
+
 .tiers {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.8rem;
   max-width: 1060px;
   margin: 0 auto;
+}
+/* Homepage teaser: just two plans, centered. */
+.tiers.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 780px;
+}
+/* "Consult our consultant" sub-line under a section head. */
+.consult-line {
+  display: inline-block;
+  margin-top: 1.1rem;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--olive-deep);
+  border-bottom: 1px solid rgba(212, 168, 67, 0.55);
+  padding-bottom: 2px;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+.consult-line:hover {
+  color: var(--espresso);
+  border-color: var(--gold);
+}
+/* .tiers.two outranks the generic .tiers mobile overrides, so it needs its own. */
+@media (max-width: 760px) {
+  .tiers.two {
+    grid-template-columns: 1fr;
+  }
 }
 .tier {
   background: var(--cream-2);
@@ -1071,8 +1709,8 @@ section.block {
 .tier ul li {
   padding: 0.6rem 0;
   font-size: 0.92rem;
-  font-weight: 300;
-  color: #5c4d40;
+  font-weight: 400;
+  color: var(--ink);
   border-bottom: 1px solid rgba(122, 90, 67, 0.12);
   display: flex;
   gap: 0.6rem;
@@ -1331,8 +1969,10 @@ footer ul li a:hover {
   .nav-in {
     height: 68px;
   }
+  /* !important: the Image sets an inline height, which would otherwise win
+     over this breakpoint and overflow the 68px mobile bar. */
   .logo-img {
-    height: 40px;
+    height: 48px !important;
   }
   .nav-cart {
     gap: 0.55rem;
@@ -1358,18 +1998,18 @@ footer ul li a:hover {
   }
   .ways {
     grid-template-columns: 1fr;
-    gap: 2.6rem;
+    gap: 1.8rem;
   }
   .picks {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
   .shop-grid,
   .menu-grid,
   .tiers {
     grid-template-columns: 1fr 1fr;
   }
-  .gallery {
-    grid-template-columns: 1fr 1fr;
+  .gallery .g {
+    width: 44vw;
   }
   .foot-grid,
   .contact-grid {
@@ -1399,6 +2039,9 @@ footer ul li a:hover {
   }
   .form-card {
     padding: 2rem 1.4rem;
+  }
+  .picks {
+    grid-template-columns: 1fr;
   }
   .dish {
     min-height: 360px;
@@ -2567,6 +3210,34 @@ footer ul li a:hover {
   border-color: var(--gold);
   background: #fff;
 }
+/* Show/hide password toggle inside the auth password field. */
+.pw-wrap {
+  position: relative;
+}
+.pw-wrap input {
+  padding-right: 2.9rem;
+}
+.pw-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.55rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: none;
+  background: none;
+  color: var(--cocoa);
+  opacity: 0.65;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.pw-toggle:hover,
+.pw-toggle:focus-visible {
+  opacity: 1;
+}
 .login-row {
   display: flex;
   justify-content: space-between;
@@ -3151,7 +3822,8 @@ footer ul li a:hover {
 
 .l40-hero-pills {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  /* minmax(0, 1fr) so long nowrap labels can't stretch a column — all pills stay equal width */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 1.1rem;
   align-items: end;
 }
@@ -3159,6 +3831,7 @@ footer ul li a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: 0;
   gap: 1.1rem;
   opacity: 0;
   transform: translateY(32px);
@@ -3205,8 +3878,10 @@ footer ul li a:hover {
   transform: translateY(-12px);
 }
 .l40-pill-label {
-  font-size: 0.58rem;
-  letter-spacing: 0.3em;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  line-height: 1.6;
+  max-width: 100%;
   text-transform: uppercase;
   color: var(--espresso);
   font-weight: 500;
@@ -3261,8 +3936,8 @@ footer ul li a:hover {
     transform: translateY(0);
   }
   .l40-pill-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.22em;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
   }
 }
 @media (max-width: 560px) {
@@ -3289,7 +3964,11 @@ footer ul li a:hover {
     aspect-ratio: 0.48/1;
   }
   .l40-pill-label {
-    font-size: 0.55rem;
-    letter-spacing: 0.2em;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
   }
 }
+
+
+
+

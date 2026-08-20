@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const ITEMS = [
   { src: HERO_IMG.table, alt: "Signature table spread", span: "md:col-span-2 md:row-span-2" },
-  { src: HERO_IMG.dish1, alt: "Saffron lamb skewers", span: "" },
+  { src: HERO_IMG.dish1, alt: "Signature high-protein dish", span: "" },
   { src: HERO_IMG.interior, alt: "Café interior", span: "md:col-span-2" },
   { src: HERO_IMG.chef, alt: "Chef plating a dish", span: "" },
   { src: HERO_IMG.cafeInterior, alt: "Dining room at dusk", span: "" },

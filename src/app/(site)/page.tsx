@@ -2,10 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AddToCart } from "@/components/add-to-cart";
+import { IntroCarousel } from "@/components/intro-carousel";
+import { PosterPager } from "@/components/poster-pager";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { WhatsAppFloat } from "@/components/whatsapp-float";
+import { formatBlogDate } from "@/lib/blog";
 import { formatFils } from "@/lib/format";
 import { HERO_IMG } from "@/lib/images";
-import { getMenu, getShopProducts } from "@/server/queries/catalog";
+import {
+  getMealPlans,
+  getMenu,
+  getShopProducts,
+} from "@/server/queries/catalog";
+import { getBlogPosts } from "@/server/queries/blog";
+import { getTeamMembers } from "@/server/queries/team";
 
 export const metadata: Metadata = {
   title: "Level 40 — More Than a Café | Dubai's First Wellness Integrated Café",
@@ -17,13 +27,55 @@ export const metadata: Metadata = {
 /** See the note in menu/page.tsx — the landing page shows live catalog data too. */
 export const revalidate = 300;
 
-const ECOSYSTEM = [
-  "Specialty Coffee",
-  "High-Protein Vegetarian Dining",
-  "Personalised Integrated Meal Plans",
-  "Online Yoga",
-  "Neat by Nicky Wellness Retail",
-  "Community Events & Workshops",
+const ECOSYSTEM: Array<{
+  title: string;
+  description: string;
+  /** optional "A • B • C" line of focus areas shown under the description */
+  tags?: string;
+}> = [
+  {
+    title: "Healthy Dining",
+    description:
+      "Nourishing, flavour-led vegetarian food designed for everyday wellness — from breakfast and power bowls to wholesome mains, smoothies, healthy treats to pre and post workout drinks.",
+  },
+  {
+    title: "Specialty Coffee",
+    description:
+      "Thoughtfully sourced and expertly crafted coffee for coffee lovers, from your morning espresso to wellness-inspired favourites.",
+  },
+  {
+    title: "Personalized Nutrition",
+    description:
+      "Nutritionist-guided programs informed by your health profile, lifestyle and relevant biomarkers, with personalized meal plans for your individual wellness goals.",
+    tags: "Diabetes • Weight Management • PCOS • Cholesterol • Longevity Plans",
+  },
+  {
+    title: "Holistic Yoga",
+    description:
+      "Guided yoga, mobility, breathwork and mindful movement — available through personalized and group wellness experiences.",
+  },
+  {
+    title: "NEAT by Nicky",
+    description:
+      "A curated wellness retail experience featuring premium activewear, yoga essentials, accessories and lifestyle products.",
+  },
+  {
+    title: "Community & Experiences",
+    description:
+      "Wellness workshops, expert talks, yoga experiences, social gatherings and curated events designed to bring our community together.",
+  },
+];
+
+/** Brand-story rail near the foot of the page — one tile per concept. */
+const GALLERY_IMAGES = [
+  "/images/chef-plating.jpg", // healthy dining
+  "/images/menu/bev-2.jpg", // specialty coffee
+  "/images/meal-plan-box.jpeg", // meal plans
+  "/images/shop/life-activewear-1.jpg", // holistic yoga
+  "/images/shop/life-accessories-1.jpg", // retail — mats & accessories
+  "/images/interior.jpg", // community & workshops
+  "/images/menu/des-1.jpg", // healthy treats
+  "/images/shop/life-wellness-1.jpg", // wellness rituals
 ];
 
 const WHY_LEVEL_40 = [
@@ -42,53 +94,97 @@ const NUMBERS_THAT_MATTER = [
 ];
 
 export default async function HomePage() {
-  const [menu, shopProducts] = await Promise.all([
-    getMenu(),
-    getShopProducts(),
-  ]);
+  const [menu, shopProducts, teamMembers, mealPlans, journalPosts] =
+    await Promise.all([
+      getMenu(),
+      getShopProducts(),
+      getTeamMembers(),
+      getMealPlans(),
+      // The two newest live posts — the rest live on /blog.
+      getBlogPosts(2),
+    ]);
+
+  // The signature programme plus the everyday one make the best storefront
+  // pair; fall back to the first two plans if either is renamed.
+  const planPicks = [
+    mealPlans.find((plan) => plan.name === "Level 40 Integrated Meal Plan"),
+    mealPlans.find((plan) => plan.name === "Standard Meal Plan"),
+  ].filter((plan) => plan !== undefined);
+  const homePlans = planPicks.length === 2 ? planPicks : mealPlans.slice(0, 4);
 
   const allMenuItems = menu.flatMap((category) => category.products);
   // "Chef's picks" were two hardcoded ids in the source. Taking the first two
   // signature items keeps it data-driven, so an admin edit is reflected here.
-  const picks = (menu.find((c) => c.slug === "signatures")?.products ?? allMenuItems).slice(0, 2);
-  const shopPicks = shopProducts.slice(0, 10);
+  // Only items with a photo qualify — a bare-background card breaks the row.
+  // Signatures come first; if fewer than four of them have photos, top the
+  // row up from the rest of the menu.
+  const signatureItems =
+    menu.find((c) => c.slug === "signatures")?.products ?? [];
+  const picks = [
+    ...signatureItems,
+    ...allMenuItems.filter((item) => !signatureItems.includes(item)),
+  ]
+    .filter((item) => item.imagePath)
+    .slice(0, 4);
+  const shopPicks = shopProducts.slice(0, 4);
 
-  const heroPills = [
-    { image: allMenuItems[0]?.imagePath ?? HERO_IMG.dish1, label: "Specialty Coffee & Dining", href: "/menu" },
-    { image: HERO_IMG.chef, label: "Online Yoga", href: "/services" },
-    { image: HERO_IMG.table, label: "Meal Plans", href: "/subscription" },
-    { image: HERO_IMG.interior, label: "Community & Workshops", href: "/about" },
-    { image: shopPicks[0]?.imagePath ?? HERO_IMG.cafeInterior, label: "Neat by Nicky Retail", href: "/shop" },
+  const heroPills: Array<{
+    image: string;
+    label: string;
+    href: string;
+    /** background-position for the pill crop; defaults to center */
+    position?: string;
+  }> = [
+    {
+      image: allMenuItems[0]?.imagePath ?? HERO_IMG.dish1,
+      label: "Healthy Dining & Specialty Coffee",
+      href: "/menu",
+    },
+    { image: HERO_IMG.yoga, label: "Holistic Yoga", href: "/services" },
+    {
+      image: HERO_IMG.mealPlan,
+      // The branded bag and box sit on the left of the photo; the tall pill
+      // crop must anchor there or the logo gets cut off.
+      position: "20% 50%",
+      label: "Nutritionist Guided Meal Plans",
+      href: "/subscription",
+    },
+    {
+      image: HERO_IMG.cafeInterior,
+      label: "Community & Workshops",
+      href: "/about",
+    },
+    {
+      image: HERO_IMG.retail,
+      label: "Neat by Nicky Retail",
+      href: "/shop",
+    },
   ];
 
   return (
     <>
       <ScrollReveal threshold={0.12} />
+      <WhatsAppFloat />
 
       <section className="l40-hero">
         <div className="l40-hero-in">
           <div className="l40-hero-copy">
-            <span className="eyebrow">
-              Welcome to Level 40 — Dubai&apos;s first wellness integrated café
-            </span>
+            <span className="eyebrow">Welcome to Level 40 — UAE&apos;s</span>
             <h1 className="l40-hero-h1">
-              MORE
+              FIRST
               <br />
-              THAN
+              WELLNESS
               <br />
-              <span className="amp">A</span>
+              <span className="amp">INTEGRATED</span>
               <br />
               <span className="accent">CAFÉ.</span>
             </h1>
-            <p className="l40-hero-lead">
+            {/* <p className="l40-hero-lead">
               A place where exceptional coffee, functional nutrition,
               <br />
               movement, and community come together.
-            </p>
+            </p> */}
             <div className="l40-hero-cta">
-              <Link href="/menu" className="l40-btn-primary">
-                Explore Our World
-              </Link>
               <Link href="/about" className="l40-btn-ghost">
                 Our Concept →
               </Link>
@@ -105,7 +201,10 @@ export default async function HomePage() {
               >
                 <div
                   className="l40-pill-img"
-                  style={{ backgroundImage: `url('${pill.image}')` }}
+                  style={{
+                    backgroundImage: `url('${pill.image}')`,
+                    backgroundPosition: pill.position ?? "center",
+                  }}
                 />
                 <span className="l40-pill-label">{pill.label}</span>
               </Link>
@@ -117,8 +216,8 @@ export default async function HomePage() {
       <div className="marquee">
         <div className="marquee-track">
           {[...ECOSYSTEM, ...ECOSYSTEM].map((item, index) => (
-            <span key={`${item}-${index}`}>
-              {item}
+            <span key={`${item.title}-${index}`}>
+              {item.title}
               <i style={{ marginLeft: "2.4rem" }}>✦</i>
             </span>
           ))}
@@ -126,36 +225,68 @@ export default async function HomePage() {
       </div>
 
       <section className="intro">
-        <div
-          className="imgcol"
-          style={{ backgroundImage: `url('${HERO_IMG.chef}')` }}
-        >
-          <span className="tag">One thoughtfully curated destination</span>
-        </div>
+        <IntroCarousel
+          tag="One thoughtfully curated destination"
+          slides={[
+            {
+              image: allMenuItems[0]?.imagePath ?? HERO_IMG.dish1,
+              label: "Healthy Dining",
+            },
+            { image: "/images/menu/bev-1.jpg", label: "Specialty Coffee" },
+            {
+              image: HERO_IMG.mealPlan,
+              label: "Personalized Nutrition",
+            },
+            { image: HERO_IMG.yoga, label: "Holistic Yoga" },
+            { image: HERO_IMG.retail, label: "NEAT by Nicky" },
+            {
+              image: HERO_IMG.cafeInterior,
+              label: "Community & Experiences",
+            },
+          ]}
+        />
         <div className="txtcol reveal">
           <span className="eyebrow">About Level 40</span>
           <h2>
-            A new way to
+            Your wellness journey
             <br />
-            experience wellness.
+            starts here.
           </h2>
           <p>
-            We created Level 40 because we saw a gap in the way people
-            experience wellness. Healthy living has become fragmented — your
-            coffee in one place, nutritious meals somewhere else, fitness in
-            another, wellness products online, and expert guidance scattered
-            everywhere.
+            Level 40 was created with one simple belief —{" "}
+            <strong>wellness should come together, not be fragmented</strong>.
+            Level 40 brings{" "}
+            <strong>
+              healthy dining, curated meal plans, holistic yoga and wellness
+              retail
+            </strong>{" "}
+            under one destination.
           </p>
           <p>
-            We believed there had to be a better way. Level 40 brings wellness
-            together in one thoughtfully curated destination, making it easier
-            to eat well, move well, connect, and enjoy the journey.
+            Our café and wellness kitchen offers thoughtfully crafted{" "}
+            <strong>
+              breakfast, lunch, dinner, smoothies, functional beverages,
+              specialty coffee, pre-workout and post-workout drinks
+            </strong>{" "}
+            with a focus on nutrition, quality ingredients and great taste.
           </p>
           <p>
-            Because wellness shouldn&apos;t feel like another task on your
-            to-do list. It should simply become part of your lifestyle.
+            Alongside, our personalized wellness programs combine{" "}
+            <strong>
+              nutritionist guidance, biomarker-informed meal plans and yoga
+            </strong>
+            , designed to support individual goals including{" "}
+            <strong>Diabetes, Weight Management, PCOS and Longevity</strong>.
           </p>
-          <div className="sig">— The Level 40 house</div>
+          <p>
+            Whether you come to eat, move, seek guidance or simply enjoy the
+            space, Level 40 makes wellness easier to become part of your
+            everyday life.
+          </p>
+          <p>
+            <strong>Eat Well. Move Well. Live Well.</strong>
+          </p>
+          <div className="sig">— Welcome to Level 40.</div>
         </div>
       </section>
 
@@ -163,20 +294,21 @@ export default async function HomePage() {
         <div className="wrap">
           <div className="sec-head reveal">
             <span className="eyebrow center">What you&apos;ll discover</span>
-            <h2>Our ecosystem</h2>
+            <h2>Our Ecosystem</h2>
             <p>
-              Whether you&apos;re stopping by for your morning coffee, looking
-              for nourishing high-protein vegetarian meals, beginning your
-              wellness journey, or simply enjoying the atmosphere — every
-              experience at Level 40 is designed with intention.
+              More than a café, Level 40 brings together food, movement,
+              personalized nutrition and wellness in one integrated destination
+              — designed to make healthier living part of your everyday life.
             </p>
           </div>
           <div className="ways">
             {ECOSYSTEM.map((item, index) => (
-              <div key={item} className="way reveal">
+              <div key={item.title} className="way reveal">
                 <div className="num">{String(index + 1).padStart(2, "0")}</div>
                 <div className="ln" />
-                <h3>{item}</h3>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+                {item.tags && <p className="way-tags">{item.tags}</p>}
               </div>
             ))}
           </div>
@@ -186,8 +318,10 @@ export default async function HomePage() {
       <section className="block menu-sec">
         <div className="wrap">
           <div className="sec-head reveal">
-            <span className="eyebrow center">High-protein vegetarian dining</span>
-            <h2>Chef&apos;s picks this week</h2>
+            <span className="eyebrow center">
+              High-protein vegetarian dining
+            </span>
+            <h2>Level 40&apos;s Exclusive</h2>
             <p>A short, seasonal list that changes with the market.</p>
           </div>
           <div className="picks">
@@ -227,9 +361,26 @@ export default async function HomePage() {
       </section>
 
       <section className="plan">
-        <div
-          className="imgcol reveal"
-          style={{ backgroundImage: `url('${HERO_IMG.table}')` }}
+        <PosterPager
+          className="reveal"
+          slides={[
+            {
+              image: "/images/why-level-40/whylevel40-panel-1.jpeg",
+              alt: "Nourish to Flourish — café and wellness kitchen",
+            },
+            {
+              image: "/images/why-level-40/whylevel40-panel-2.jpeg",
+              alt: "Move to Transform — yoga, mobility and wellness",
+            },
+            {
+              image: "/images/why-level-40/whylevel40-panel-3.jpeg",
+              alt: "Guided to Your Best — guidance, plans and products",
+            },
+            {
+              image: "/images/why-level-40/whylevel40.jpeg",
+              alt: "Wellness works better together",
+            },
+          ]}
         />
         <div className="txt reveal">
           <span className="eyebrow">Why Level 40?</span>
@@ -244,13 +395,10 @@ export default async function HomePage() {
               </li>
             ))}
           </ul>
-          <Link href="/about" className="btn btn-gold">
-            Discover our concept
-          </Link>
         </div>
       </section>
 
-      <section className="block">
+      {/* <section className="block">
         <div className="wrap">
           <div className="sec-head reveal">
             <span className="eyebrow center">The numbers that matter</span>
@@ -273,12 +421,14 @@ export default async function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       <section className="block">
         <div className="wrap">
           <div className="sec-head reveal">
-            <span className="eyebrow center">Neat by Nicky wellness retail</span>
+            <span className="eyebrow center">
+              Neat by Nicky wellness retail
+            </span>
             <h2>Yoga &amp; wellness essentials</h2>
             <p>Chosen with the same care we put on the plate.</p>
           </div>
@@ -305,7 +455,9 @@ export default async function HomePage() {
                   </h3>
                   {product.description && <p>{product.description}</p>}
                   <div className="row">
-                    <span className="price">{formatFils(product.priceFils)}</span>
+                    <span className="price">
+                      {formatFils(product.priceFils)}
+                    </span>
                     <AddToCart
                       productId={product.id}
                       name={product.name}
@@ -329,6 +481,112 @@ export default async function HomePage() {
       <section className="block">
         <div className="wrap">
           <div className="sec-head reveal">
+            <span className="eyebrow center">Nutritionist guided</span>
+            <h2>Explore Meal Plans</h2>
+            <p>
+              Biomarker-informed programmes built around your goals — from
+              everyday balance to condition-specific nutrition, made fresh at
+              Level 40.
+            </p>
+            <Link href="/contact" className="consult-line reveal">
+              Consult our consultant — a one-on-one session to find the plan
+              that fits you →
+            </Link>
+          </div>
+
+          <div className="tiers two">
+            {homePlans.map((plan) => {
+              const featured = plan.name === "Level 40 Integrated Meal Plan";
+              return (
+                <div
+                  key={plan.id}
+                  className={`tier reveal${featured ? " feat" : ""}`}
+                >
+                  {featured && <span className="flag">Signature</span>}
+                  <h3>{plan.name}</h3>
+                  <div className="cad">
+                    {plan.mealsPerWeek} meals ·{" "}
+                    {plan.durationWeeks === 1
+                      ? "per week"
+                      : `per ${plan.durationWeeks} weeks`}
+                  </div>
+                  <div className="cost">{formatFils(plan.priceFils)}</div>
+                  {plan.description && <p>{plan.description}</p>}
+                  <ul>
+                    {plan.features.slice(0, 4).map((feature) => (
+                      <li key={feature}>{feature}</li>
+                    ))}
+                  </ul>
+                  <Link href="/subscription" className="btn btn-gold">
+                    View this plan
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="center-link reveal">
+            <Link href="/subscription" className="btn btn-dark">
+              Explore all meal plans
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {journalPosts.length > 0 && (
+        <section className="block journal-sec">
+          <div className="wrap">
+            <div className="sec-head reveal">
+              <span className="eyebrow center">From our journal</span>
+              <h2>Wellness stories &amp; notes</h2>
+              <p>
+                Ideas, recipes and small rituals from the Level 40 kitchen —
+                written to make everyday wellness feel simple.
+              </p>
+            </div>
+
+            <div className="journal-grid">
+              {journalPosts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.slug}`}
+                  className="journal-card reveal"
+                >
+                  <div
+                    className="journal-cover"
+                    style={
+                      post.images[0]
+                        ? { backgroundImage: `url('${post.images[0]}')` }
+                        : undefined
+                    }
+                  />
+                  <div className="journal-body">
+                    <div className="journal-meta">
+                      <span>{formatBlogDate(post.publishedAt)}</span>
+                      {post.hashtags[0] && (
+                        <span className="journal-tag">#{post.hashtags[0]}</span>
+                      )}
+                    </div>
+                    <h3>{post.title}</h3>
+                    <p>{post.excerpt}</p>
+                    <span className="journal-read">Read the story →</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            <div className="center-link reveal">
+              <Link href="/blog" className="btn btn-dark">
+                Read all stories
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="block">
+        <div className="wrap">
+          <div className="sec-head reveal">
             <span className="eyebrow center">The people behind Level 40</span>
             <h2>Meet the team</h2>
             <p>
@@ -338,6 +596,25 @@ export default async function HomePage() {
               simpler, more enjoyable, and accessible to everyone.
             </p>
           </div>
+          {teamMembers.length > 0 && (
+            <div className="team-grid">
+              {teamMembers.map((member) => (
+                <div key={member.id} className="team-card reveal">
+                  <div
+                    className="team-photo"
+                    style={
+                      member.imagePath
+                        ? { backgroundImage: `url('${member.imagePath}')` }
+                        : undefined
+                    }
+                  />
+                  <h3>{member.name}</h3>
+                  <span className="team-role">{member.designation}</span>
+                  {member.bio && <p>{member.bio}</p>}
+                </div>
+              ))}
+            </div>
+          )}
           <div className="ways">
             <div className="way reveal">
               <div className="num">✦</div>
@@ -357,10 +634,9 @@ export default async function HomePage() {
               <h3>Our community</h3>
               <p>
                 Level 40 is more than a destination — it&apos;s a growing
-                community. From wellness workshops and educational talks to
-                yoga sessions and social gatherings, we bring people together
-                through shared experiences that inspire healthier, happier
-                living.
+                community. From wellness workshops and educational talks to yoga
+                sessions and social gatherings, we bring people together through
+                shared experiences that inspire healthier, happier living.
               </p>
             </div>
             <div className="way reveal">
@@ -383,7 +659,9 @@ export default async function HomePage() {
       >
         <div className="wrap">
           <div className="card reveal">
-            <span className="eyebrow">Every experience, designed with intention</span>
+            <span className="eyebrow">
+              Every experience, designed with intention
+            </span>
             <h2>Eat well. Move well. Connect. Enjoy the journey.</h2>
             <p>
               Stop by for your morning coffee, stay for a nourishing meal, join
@@ -398,23 +676,18 @@ export default async function HomePage() {
       </section>
 
       <section style={{ padding: 0 }}>
+        {/* Brand-story rail: about four tiles visible, drifting continuously.
+            The list renders twice so the loop is seamless, like the marquee. */}
         <div className="gallery">
-          <div
-            className="g reveal"
-            style={{ backgroundImage: `url('${HERO_IMG.dish1}')` }}
-          />
-          <div
-            className="g reveal"
-            style={{ backgroundImage: `url('${HERO_IMG.chef}')` }}
-          />
-          <div
-            className="g reveal"
-            style={{ backgroundImage: `url('${HERO_IMG.cafeInterior}')` }}
-          />
-          <div
-            className="g reveal"
-            style={{ backgroundImage: `url('${HERO_IMG.table}')` }}
-          />
+          <div className="gallery-track">
+            {[...GALLERY_IMAGES, ...GALLERY_IMAGES].map((image, index) => (
+              <div
+                key={`${image}-${index}`}
+                className="g"
+                style={{ backgroundImage: `url('${image}')` }}
+              />
+            ))}
+          </div>
         </div>
       </section>
     </>

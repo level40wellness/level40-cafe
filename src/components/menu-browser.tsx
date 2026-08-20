@@ -11,7 +11,8 @@ export interface MenuItem {
   description: string | null;
   priceFils: number;
   imagePath: string | null;
-  ingredients: string | null;
+  /** Comma-separated nutrition facts ("420 kcal, 32g protein, …"). */
+  nutrition: string | null;
 }
 
 export interface MenuCategory {
@@ -27,8 +28,6 @@ export interface MenuCategory {
  */
 export function MenuBrowser({ categories }: { categories: MenuCategory[] }) {
   const [selected, setSelected] = useState<string>("all");
-
-  console.log(categories);
 
   const visible =
     selected === "all"
@@ -75,21 +74,17 @@ export function MenuBrowser({ categories }: { categories: MenuCategory[] }) {
                   <span className="price">{formatFils(item.priceFils)}</span>
                 </div>
                 {item.description && <p className="desc">{item.description}</p>}
-                {item.ingredients && (
-                  <div className="mt-3 mb-4">
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                      Ingredients
-                    </p>
-
-                    <ul className="ml-5 grid grid-cols-2 gap-x-4 gap-y-2 list-disc text-xs leading-5 text-gray-600 marker:text-green-600">
-                      {item.ingredients
-                        .split(",")
-                        .map((i) => i.trim())
-                        .filter(Boolean)
-                        .map((ingredient, index) => (
-                          <li key={index}>{ingredient}</li>
-                        ))}
-                    </ul>
+                {item.nutrition && (
+                  <div className="nutri-row">
+                    {item.nutrition
+                      .split(",")
+                      .map((fact) => fact.trim())
+                      .filter(Boolean)
+                      .map((fact) => (
+                        <span key={fact} className="nutri-pill">
+                          {fact}
+                        </span>
+                      ))}
                   </div>
                 )}
                 <div className="foot">

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { HERO_IMG } from "@/lib/images";
+import { MAP_QUERY } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -10,8 +11,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
 };
 
-const MAP_QUERY =
-  "Continents+Tower+District+13+Al+Barsha+South+Fourth+Jumeirah+Village+Circle+Dubai";
 
 export default function ContactPage() {
   return (

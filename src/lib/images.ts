@@ -10,4 +10,7 @@ export const HERO_IMG = {
   dish1: "/images/dish-1.jpg",
   // Was a hotlinked Unsplash photo; we have a licensed local shot.
   chef: "/images/chef-plating.jpg",
+  yoga: "/images/shop/life-mats-1.jpg",
+  mealPlan: "/images/meal-plan-box.jpeg",
+  retail: "/images/shop/mat-premium.jpg",
 } as const;

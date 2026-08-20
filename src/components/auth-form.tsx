@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
 import { signIn, signUp } from "@/lib/auth-client";
@@ -29,6 +30,7 @@ export function AuthForm({
   const router = useRouter();
   const [mode, setMode] = useState<Mode>(initialMode);
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const isSignup = mode === "signup";
 
@@ -167,14 +169,28 @@ export function AuthForm({
 
       <div className="field">
         <label htmlFor="auth-password">Password</label>
-        <input
-          id="auth-password"
-          name="password"
-          type="password"
-          autoComplete={isSignup ? "new-password" : "current-password"}
-          minLength={8}
-          required
-        />
+        <div className="pw-wrap">
+          <input
+            id="auth-password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            autoComplete={isSignup ? "new-password" : "current-password"}
+            minLength={8}
+            required
+          />
+          <button
+            type="button"
+            className="pw-toggle"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            onClick={() => setShowPassword((visible) => !visible)}
+          >
+            {showPassword ? (
+              <EyeOff size={18} aria-hidden="true" />
+            ) : (
+              <Eye size={18} aria-hidden="true" />
+            )}
+          </button>
+        </div>
         {!isSignup && (
           <p
             className="hint"

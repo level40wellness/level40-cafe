@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 
+import { MAP_DIRECTIONS_URL } from "@/lib/site";
 import { BrandLogo } from "./brand-logo";
 
 export function SiteFooter() {
@@ -10,9 +12,10 @@ export function SiteFooter() {
           <div>
             <BrandLogo variant="footer" />
             <p className="blurb">
-              A modern café celebrating the warmth of Arabian hospitality with
-              seasonal, chef-driven cooking. Dine in, order ahead, or scan the QR
-              at your table.
+              UAE&apos;s first wellness-integrated café — high-protein
+              vegetarian dining, specialty coffee, nutritionist-guided meal
+              plans, holistic yoga and curated retail, together in one
+              destination. Eat well. Move well. Live well.
             </p>
             <div className="socials">
               <a
@@ -79,8 +82,23 @@ export function SiteFooter() {
             <h4>Visit</h4>
             <address>
               <div>Continents Tower, JVC, Dubai</div>
-              <div>+971 4 000 0000</div>
+              <div>+971 56 454 8896</div>
               <div>hello@level40wellness.com</div>
+              <div>
+                <a
+                  href={MAP_DIRECTIONS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: ".35rem",
+                  }}
+                >
+                  Get directions
+                  <ExternalLink size={13} aria-hidden="true" />
+                </a>
+              </div>
             </address>
           </div>
           <div>
@@ -90,7 +108,7 @@ export function SiteFooter() {
                 <Link href="/menu">Menu &amp; Order</Link>
               </li>
               <li>
-                <Link href="/shop">Shop</Link>
+                <Link href="/shop">Neat by Nicky Retail</Link>
               </li>
               <li>
                 <Link href="/subscription">Meal Plans</Link>
@@ -112,9 +130,10 @@ export function SiteFooter() {
             <h4>Hours</h4>
             <ul>
               <li>Open daily · 8am – 12am</li>
-              <li>Kitchen till 11pm</li>
-              <li>Pickup &amp; delivery</li>
-              <li>Crafted in Dubai</li>
+              <li>
+                Pickup &amp; delivery ·{" "}
+                <a href="tel:+971564548896">+971 56 454 8896</a>
+              </li>
             </ul>
           </div>
         </div>

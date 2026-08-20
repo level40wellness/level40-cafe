@@ -83,7 +83,12 @@ export const products = pgTable(
      * unique index below.
      */
     sku: text(),
-    ingredients: text(),
+    /**
+     * Comma-separated nutrition facts ("420 kcal, 32g protein, …"), rendered
+     * as pills on the menu cards. Free-form so the admin decides which
+     * parameters each dish shows.
+     */
+    nutrition: text(),
     // Menu-specific presentation, previously only in the static file.
     tags: text().array().default([]).notNull(),
     emoji: text(),

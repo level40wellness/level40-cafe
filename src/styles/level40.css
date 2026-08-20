@@ -964,6 +964,79 @@ section.block {
   box-shadow: 0 24px 44px -30px rgba(44, 30, 20, 0.45);
 }
 
+/* ---- ABOUT PAGE (document layout) ---- */
+.about-doc {
+  max-width: 50rem;
+  margin: 0 auto;
+}
+.about-doc h2 {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: var(--espresso);
+  margin: 2.8rem 0 1.1rem;
+}
+.about-doc > p {
+  font-size: 1.25rem;
+  line-height: 1.85;
+  font-weight: 300;
+  color: var(--cocoa);
+  margin-bottom: 1.4rem;
+}
+.about-doc strong {
+  font-weight: 600;
+  color: var(--espresso);
+}
+.doc-programs {
+  font-family: var(--sans);
+  font-size: 0.95rem !important;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600 !important;
+  color: var(--olive-deep) !important;
+}
+.doc-pillars {
+  margin: 0.4rem 0 1.5rem;
+}
+.doc-pillars > div {
+  margin-bottom: 1.1rem;
+  padding-left: 1.2rem;
+  border-left: 3px solid var(--gold);
+}
+.doc-pillars dt {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--espresso);
+  margin-bottom: 0.25rem;
+}
+.doc-pillars dd {
+  font-size: 1.2rem;
+  line-height: 1.75;
+  font-weight: 300;
+  color: var(--cocoa);
+  margin: 0;
+}
+.doc-farewell {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(212, 168, 67, 0.45);
+  text-align: center;
+}
+.doc-farewell p {
+  font-family: var(--serif);
+  font-weight: 700;
+  color: var(--espresso);
+  font-size: 1.6rem;
+  line-height: 1.5;
+  margin-bottom: 0.4rem;
+}
+.doc-farewell p:last-child {
+  font-style: italic;
+  color: var(--gold);
+}
+
 @media (max-width: 980px) {
   .journal-grid.three {
     grid-template-columns: repeat(2, minmax(0, 1fr));

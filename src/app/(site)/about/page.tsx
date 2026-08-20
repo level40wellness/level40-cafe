@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { HERO_IMG } from "@/lib/images";
@@ -7,10 +6,30 @@ import { HERO_IMG } from "@/lib/images";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "The story behind Level 40 — UAE's first wellness-integrated café, bringing healthy dining, meal plans, yoga and wellness retail together in Dubai.",
+    "About Level 40 — the UAE's first Integrated Wellness Café, bringing healthy dining, curated meal plans, holistic yoga and wellness retail under one destination in Dubai.",
   alternates: { canonical: "/about" },
 };
 
+/** The three pillars, verbatim from the brand's About document. */
+const PILLARS = [
+  {
+    title: "Nourish",
+    body: "Personalized nutrition guidance and freshly prepared wellness-focused meals.",
+  },
+  {
+    title: "Move",
+    body: "Holistic yoga, mobility, breathwork and mindful movement designed to complement an active lifestyle.",
+  },
+  {
+    title: "Live Well",
+    body: "Practical, sustainable lifestyle choices that help make wellness part of everyday life.",
+  },
+];
+
+/**
+ * Rendered as the brand's About document, in its original order and emphasis —
+ * not remixed into marketing sections. Copy edits are limited to typo fixes.
+ */
 export default function AboutPage() {
   return (
     <>
@@ -23,116 +42,128 @@ export default function AboutPage() {
         <div className="inner">
           <span className="eyebrow center">Our Story</span>
           <h1>
-            More than <em>a café.</em>
+            About <em>Level 40.</em>
           </h1>
           <p>
-            Level 40 was born from a simple belief: wellness should come
-            together, not be fragmented — one destination for how you eat,
-            move and live.
+            Founded with a vision to redefine everyday wellness — the UAE&apos;s
+            first Integrated Wellness Café.
           </p>
-        </div>
-      </section>
-
-      <section className="intro">
-        <div
-          className="imgcol"
-          style={{ backgroundImage: `url('${HERO_IMG.interior}')` }}
-        >
-          <span className="tag">Continents Tower, JVC, Dubai</span>
-        </div>
-        <div className="txtcol reveal">
-          <span className="eyebrow">Built around balance</span>
-          <h2>One destination for modern wellness.</h2>
-          <p>
-            Most of us don&apos;t struggle with wellness for lack of
-            information — the pieces are simply scattered. Level 40 brings them
-            under one roof: a high-protein vegetarian kitchen and specialty
-            coffee bar, nutritionist-guided and biomarker-informed meal plans,
-            holistic yoga, and NEAT by Nicky wellness retail.
-          </p>
-          <p>
-            Every menu, programme and product is developed with
-            evidence-informed nutrition principles and a practical approach to
-            healthy living — progress over perfection, balance over extremes,
-            and habits that survive real life. Come for your morning coffee,
-            stay for a nourishing meal, join a workshop, or simply enjoy the
-            space.
-          </p>
-          <div className="sig">— Eat Well. Move Well. Live Well.</div>
         </div>
       </section>
 
       <section className="block">
         <div className="wrap">
-          <div className="sec-head reveal">
-            <span className="eyebrow center">What we stand for</span>
-            <h2>The Level 40 promise</h2>
-          </div>
-          <div className="ways">
-            <div className="way reveal">
-              <div className="num">01</div>
-              <div className="ln" />
-              <h3>Science-backed nutrition</h3>
-              <p>
-                Evidence-informed, biomarker-guided plans and menus — with
-                real-world practicality, not fads.
-              </p>
-            </div>
-            <div className="way reveal">
-              <div className="num">02</div>
-              <div className="ln" />
-              <h3>Made fresh, made honest</h3>
-              <p>
-                High-protein vegetarian food and specialty coffee, crafted
-                daily from premium ingredients.
-              </p>
-            </div>
-            <div className="way reveal">
-              <div className="num">03</div>
-              <div className="ln" />
-              <h3>Balance over extremes</h3>
-              <p>
-                Designed around balance, not restriction — sustainable habits
-                for everyday life.
-              </p>
-            </div>
-          </div>
-
-          <div className="stats reveal">
-            <div className="stat">
-              <b>100%</b>
-              <span>Vegetarian, high-protein focused</span>
-            </div>
-            <div className="stat">
-              <b>One</b>
-              <span>Integrated wellness destination</span>
-            </div>
-            <div className="stat">
-              <b>Countless</b>
-              <span>Everyday transformations</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section
-        className="interior"
-        style={{ backgroundImage: `url('${HERO_IMG.interior}')` }}
-      >
-        <div className="wrap">
-          <div className="card reveal">
-            <span className="eyebrow">Come and see</span>
-            <h2>A space made for wellness — and for lingering.</h2>
+          <article className="about-doc reveal">
             <p>
-              Beautiful spaces you&apos;ll actually want to spend time in.
-              Stop by for your morning coffee, stay for a nourishing meal,
-              join a yoga session or a workshop — and leave a little better
-              than you arrived.
+              Founded with a vision to redefine everyday wellness,{" "}
+              <strong>
+                Level 40 is the UAE&apos;s first Integrated Wellness Café
+              </strong>
+              , bringing healthy dining, curated meal plans, holistic yoga and
+              wellness retail under one destination.
             </p>
-            <Link href="/contact" className="btn btn-gold">
-              Reserve a table
-            </Link>
-          </div>
+            <p>
+              At Level 40, we believe{" "}
+              <strong>wellness should not be fragmented</strong>. Our bodies
+              are interconnected parts of the same journey. That is why we have
+              created an ecosystem where customers can enjoy nourishing food,
+              access professional nutrition guidance, practise yoga and
+              discover thoughtfully selected wellness products — all within one
+              inspiring community.
+            </p>
+
+            <h2>More Than a Healthy Café</h2>
+            <p>Level 40 goes beyond serving healthy food.</p>
+            <p>
+              Our café and wellness kitchen offers thoughtfully crafted{" "}
+              <strong>
+                breakfast, lunch, dinner, smoothies, functional beverages,
+                specialty coffee, pre-workout and post-workout drinks
+              </strong>{" "}
+              with a focus on nutrition, quality ingredients and great taste.
+            </p>
+            <p>
+              Alongside our everyday café experience, Level 40 offers
+              structured, personalized wellness programs designed to support
+              individuals managing lifestyle and metabolic health goals
+              including:
+            </p>
+            <p className="doc-programs">
+              Diabetes Management • Weight Management • PCOS • Cholesterol
+              Control • Longevity Meal Plans
+            </p>
+            <p>
+              Our approach begins with understanding the individual. Through a
+              consultation with a qualified nutrition professional, relevant
+              health information, lifestyle factors and blood-report biomarkers
+              are used to develop a more personalized nutrition and meal plan.
+            </p>
+            <p>
+              Rather than following a generic diet, the objective is simple:{" "}
+              <strong>
+                create a nutrition approach designed around the individual
+              </strong>
+              .
+            </p>
+
+            <h2>Nutrition. Movement. Lifestyle.</h2>
+            <p>
+              We believe food alone is only one part of sustainable wellness.
+            </p>
+            <p>Our programs bring together three fundamental pillars:</p>
+            <dl className="doc-pillars">
+              {PILLARS.map((pillar) => (
+                <div key={pillar.title}>
+                  <dt>{pillar.title}</dt>
+                  <dd>{pillar.body}</dd>
+                </div>
+              ))}
+            </dl>
+            <p>
+              This integrated philosophy allows Level 40 to connect
+              professional guidance with real-world execution — from knowing
+              what to eat to having those meals prepared, incorporating
+              movement into your routine and becoming part of a
+              wellness-focused community.
+            </p>
+
+            <h2>Wellness Meets Lifestyle</h2>
+            <p>
+              Level 40 is also home to <strong>NEAT by Nicky</strong>, bringing
+              wellness beyond food through a curated collection of activewear,
+              yoga apparel, yoga mats, accessories and lifestyle products.
+            </p>
+            <p>
+              It creates a unique environment where customers can eat, move,
+              discover and connect under one roof.
+            </p>
+
+            <h2>Our Philosophy</h2>
+            <p>
+              We don&apos;t believe wellness should mean extreme diets,
+              temporary challenges or one-size-fits-all solutions.
+            </p>
+            <p>
+              We believe in{" "}
+              <strong>
+                personalization, consistency and sustainable progress
+              </strong>
+              .
+            </p>
+            <p>
+              Whether you visit us for your morning specialty coffee, a healthy
+              lunch, a yoga session, a personalized nutrition program or simply
+              to spend time in an uplifting environment, Level 40 is designed
+              to make healthier choices easier to incorporate into everyday
+              life.
+            </p>
+
+            <div className="doc-farewell">
+              <p>Eat Well. Move Well. Live Well.</p>
+              <p>Welcome to Level 40.</p>
+              <p>Your wellness journey starts here.</p>
+            </div>
+          </article>
         </div>
       </section>
     </>

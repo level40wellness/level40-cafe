@@ -798,6 +798,15 @@ async function seedCustomers() {
 }
 
 async function main() {
+  // Belt-and-braces: the Vercel build (`vercel-build`) only migrates and
+  // builds, but if this script is ever wired into a Vercel environment by
+  // mistake, refuse rather than write to the production database.
+  if (process.env.VERCEL && process.env.SEED_ALLOW !== "1") {
+    console.log("Detected a Vercel environment — refusing to seed.");
+    console.log("Set SEED_ALLOW=1 to override deliberately.");
+    return;
+  }
+
   const categoryIds = await seedCategories();
   console.log(`categories : ${categoryIds.size}`);
 

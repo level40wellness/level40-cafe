@@ -30,7 +30,7 @@ const SERVICES = [
   {
     icon: Truck,
     title: "Pickup & Delivery",
-    body: "Order ahead from anywhere in Dubai — call +971 56 454 8896 and your meal is packaged with care, ready when you are.",
+    body: "Order ahead from anywhere in Dubai — call +971 55 739 2980 and your meal is packaged with care, ready when you are.",
   },
   {
     icon: Salad,

@@ -42,7 +42,12 @@ export function SiteFooter() {
                   <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
                 </svg>
               </a>
-              <a href="#" aria-label="Facebook">
+              <a
+                href="https://www.facebook.com/p/Level40-61591501595136/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook — Level 40"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="18"
@@ -58,7 +63,12 @@ export function SiteFooter() {
                   <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                 </svg>
               </a>
-              <a href="#" aria-label="LinkedIn">
+              <a
+                href="https://www.linkedin.com/company/level-40-cafe/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn — Level 40"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="18"
@@ -82,7 +92,7 @@ export function SiteFooter() {
             <h4>Visit</h4>
             <address>
               <div>Continents Tower, JVC, Dubai</div>
-              <div>+971 56 454 8896</div>
+              <div>+971 55 739 2980</div>
               <div>hello@level40wellness.com</div>
               <div>
                 <a
@@ -119,11 +129,7 @@ export function SiteFooter() {
               <li>
                 <Link href="/contact">Contact</Link>
               </li>
-              <li>
-                <a href="/tour.html" target="_blank" rel="noopener noreferrer">
-                  Virtual Tour ↗
-                </a>
-              </li>
+              {/* Virtual Tour hidden for now — restore the /tour.html link here. */}
             </ul>
           </div>
           <div>
@@ -132,7 +138,7 @@ export function SiteFooter() {
               <li>Open daily · 8am – 12am</li>
               <li>
                 Pickup &amp; delivery ·{" "}
-                <a href="tel:+971564548896">+971 56 454 8896</a>
+                <a href="tel:+971557392980">+971 55 739 2980</a>
               </li>
             </ul>
           </div>

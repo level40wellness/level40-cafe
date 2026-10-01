@@ -30,6 +30,7 @@ const planSchema = z.object({
   durationWeeks: z.coerce.number().int().min(1).max(52),
   // One feature per line is how the subscription page renders them.
   features: z.string().trim().max(2000).optional(),
+  imageUrl: z.url("Upload a photo or leave it empty.").optional(),
   sortOrder: z.coerce.number().int().min(0).max(9999).default(0),
   active: z.boolean(),
 });
@@ -42,6 +43,7 @@ function parse(formData: FormData) {
     mealsPerWeek: formData.get("mealsPerWeek") || 5,
     durationWeeks: formData.get("durationWeeks") || 1,
     features: formData.get("features") || undefined,
+    imageUrl: formData.get("imageUrl") || undefined,
     sortOrder: formData.get("sortOrder") || 0,
     active: formData.get("active") === "on",
   });
@@ -87,6 +89,7 @@ export async function createMealPlanAction(
       mealsPerWeek: parsed.data.mealsPerWeek,
       durationWeeks: parsed.data.durationWeeks,
       features: splitFeatures(parsed.data.features),
+      imageUrl: parsed.data.imageUrl ?? null,
       sortOrder: parsed.data.sortOrder,
       active: parsed.data.active,
       createdBy: admin.id,
@@ -130,6 +133,7 @@ export async function updateMealPlanAction(
         mealsPerWeek: parsed.data.mealsPerWeek,
         durationWeeks: parsed.data.durationWeeks,
         features: splitFeatures(parsed.data.features),
+        imageUrl: parsed.data.imageUrl ?? null,
         sortOrder: parsed.data.sortOrder,
         active: parsed.data.active,
         updatedAt: new Date(),

@@ -1,14 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  Dumbbell,
-  FlaskConical,
-  Flower2,
-  Salad,
-  Stethoscope,
-  TrendingUp,
-} from "lucide-react";
 
+import { JourneyFlow } from "@/components/journey-flow";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { formatFils } from "@/lib/format";
 import { HERO_IMG } from "@/lib/images";
@@ -23,50 +16,6 @@ export const metadata: Metadata = {
 
 /** See the note in menu/page.tsx. */
 export const revalidate = 300;
-
-/** The journey from the founders' whiteboard: assess → guide → nourish → move → measure. */
-const JOURNEY = [
-  {
-    title: "Assess",
-    detail: "Blood tests build your complete health profile",
-    icon: FlaskConical,
-  },
-  {
-    title: "Nutritionist Consultation",
-    detail: "Your goals and biomarkers, reviewed one-on-one",
-    icon: Stethoscope,
-  },
-  {
-    title: "Personalised Meal Plan",
-    detail: "Biomarker-informed fresh meals, made daily at Level 40",
-    icon: Salad,
-  },
-  {
-    title: "Yoga Consultation",
-    detail: "Movement guidance matched to your body",
-    icon: Flower2,
-  },
-  {
-    title: "Guided Fitness Plan",
-    detail: "A routine you can actually keep",
-    icon: Dumbbell,
-  },
-  {
-    title: "Progress",
-    detail: "Measurable improvements, tracked with you",
-    icon: TrendingUp,
-  },
-];
-
-/** One brand tone per step, standing in for the reference's rainbow. */
-const STEP_COLORS = [
-  "var(--gold)",
-  "var(--olive)",
-  "var(--cocoa)",
-  "var(--gold-soft)",
-  "var(--olive-deep)",
-  "var(--espresso)",
-];
 
 export default async function SubscriptionPage() {
   const plans = await getMealPlans();
@@ -102,49 +51,7 @@ export default async function SubscriptionPage() {
             </p>
           </div>
 
-          {/* Snaking process flow: each card is wrapped by its colour's path,
-              diamond number badges alternate above/below, arrows hook into
-              the next step — after the reference infographic, in brand tones. */}
-          <div className="fp-flow reveal">
-            {JOURNEY.map((step, index) => {
-              const numberOnTop = index % 2 === 0;
-              const Icon = step.icon;
-              const number = String(index + 1).padStart(2, "0");
-              return (
-                <div
-                  key={step.title}
-                  className={`fp-step ${numberOnTop ? "is-top" : "is-bottom"}`}
-                  style={
-                    { "--fpc": STEP_COLORS[index] } as React.CSSProperties
-                  }
-                >
-                  <div className="fp-zone">
-                    {numberOnTop ? (
-                      <span className="fp-num">
-                        <i>{number}</i>
-                      </span>
-                    ) : (
-                      <p className="fp-text">{step.detail}</p>
-                    )}
-                  </div>
-                  <div className="fp-card">
-                    <Icon size={20} aria-hidden="true" />
-                    <h4>{step.title}</h4>
-                  </div>
-                  <div className="fp-zone">
-                    {numberOnTop ? (
-                      <p className="fp-text">{step.detail}</p>
-                    ) : (
-                      <span className="fp-num">
-                        <i>{number}</i>
-                      </span>
-                    )}
-                  </div>
-                  <span className="fp-wrap" aria-hidden="true" />
-                </div>
-              );
-            })}
-          </div>
+          <JourneyFlow />
         </div>
       </section>
 
@@ -167,6 +74,14 @@ export default async function SubscriptionPage() {
                   key={plan.id}
                   className={`tier reveal${featured ? " feat" : ""}`}
                 >
+                  {plan.imageUrl && (
+                    <div
+                      className="tier-img"
+                      role="img"
+                      aria-label={plan.name}
+                      style={{ backgroundImage: `url('${plan.imageUrl}')` }}
+                    />
+                  )}
                   {featured && <span className="flag">Signature</span>}
                   <h3>{plan.name}</h3>
                   <div className="cad">

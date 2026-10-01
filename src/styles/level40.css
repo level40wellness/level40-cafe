@@ -14,6 +14,7 @@
   --olive-deep: #5e6e3a;
   --gold: #d4a843; /* accent = Golden Honey */
   --gold-soft: #e4c97e; /* lighter honey tint for text on dark */
+  --gold-deep: #7d5c10; /* darkened honey for text on cream */
   --cream: #f7f2e8; /* logo background cream */
   --cream-2: #f0e9d9;
   --ink: #3a2e24;
@@ -861,8 +862,19 @@ section.block {
   text-transform: uppercase;
   color: var(--cocoa);
 }
+.journal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.9rem;
+  margin-top: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
 .journal-tag {
-  color: var(--gold);
+  color: var(--gold-deep);
+  font-weight: 500;
 }
 .journal-body h3 {
   font-size: 1.55rem;
@@ -883,7 +895,8 @@ section.block {
   font-size: 0.72rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold-deep);
+  font-weight: 500;
 }
 /* /blog lists every post, so it trades the homepage pair for three-up. */
 .journal-grid.three {
@@ -934,7 +947,8 @@ section.block {
   font-size: 0.7rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold-deep);
+  font-weight: 500;
 }
 .journal-article > p {
   font-size: 1.08rem;
@@ -1140,6 +1154,12 @@ section.block {
   font-weight: 500;
   white-space: nowrap;
   letter-spacing: 0.02em;
+}
+/* On cream cards the light tint is unreadable — use the deep honey. */
+.m-card .price,
+.prod .price {
+  color: var(--gold-deep);
+  font-weight: 600;
 }
 .add {
   font-size: 0.68rem;
@@ -1479,7 +1499,8 @@ section.block {
   font-size: 0.62rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  white-space: nowrap;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   padding: 0.32rem 0.7rem;
   border-radius: 999px;
   border: 1px solid rgba(212, 168, 67, 0.45);
@@ -1494,187 +1515,394 @@ section.block {
 }
 
 /* ---- MEAL PLAN TIERS ---- */
-/* ---- MEAL PLAN PROCESS FLOW (snaking infographic) ---- */
-/* Each step's colour comes in via --fpc. The wrap element draws the path
-   that hugs the card — over the top for odd steps, under the bottom for
-   even ones — ending in an arrowhead that hooks toward the next step. */
-.fp-flow {
-  --fp-gap: 2.4rem;
+/* ---- MEAL PLAN JOURNEY (animated process flow) ---- */
+/* <JourneyFlow>: each step's path draws in on a stagger (--d) once the row is
+   in view, its diamond badge pops, card rises and caption fades; then a
+   highlight walks the steps. Step colour arrives via --jc. Below 760px the
+   paths drop away and the steps stack as badge + card rows. */
+.jr {
   display: flex;
-  justify-content: center;
-  align-items: stretch;
-  gap: var(--fp-gap);
-  max-width: 1220px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-.fp-step {
-  position: relative;
-  flex: 1 1 0;
-  min-width: 0;
-  max-width: 200px;
-  display: grid;
-  grid-template-rows: 72px minmax(96px, auto) 72px;
-}
-.fp-zone {
-  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 3.5rem;
 }
-.fp-card {
+.jr-stage {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 1220px;
+  display: grid;
+  grid-template-columns: repeat(6, 200px);
+}
+.jr-col {
   position: relative;
-  z-index: 2;
+  height: 320px;
+}
+.jr-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+}
+.jr-line {
+  stroke-dasharray: 320;
+  stroke-dashoffset: 320;
+  transition: stroke-width 0.4s;
+}
+.jr-head {
+  opacity: 0;
+}
+.jr-dwrap {
+  position: absolute;
+  left: 78px;
+  width: 44px;
+  height: 44px;
+  opacity: 0;
+  transform: rotate(45deg);
+}
+.jr-odd .jr-dwrap {
+  top: 18px;
+}
+.jr-even .jr-dwrap {
+  top: 254px;
+}
+.jr-dia {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  background: var(--jc);
+  color: var(--jc);
+  transition:
+    transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.45s;
+  box-shadow: 0 6px 14px -6px rgba(46, 33, 24, 0.4);
+}
+.jr-dia > span {
+  transform: rotate(-45deg);
+  font: 500 13px/1 var(--sans);
+  letter-spacing: 0.04em;
+}
+.jr-card {
+  position: absolute;
+  left: 16px;
+  top: 100px;
+  width: 168px;
+  height: 116px;
+  opacity: 0;
+}
+.jr-cardin {
+  appearance: none;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: 2.5px solid var(--jc);
+  border-radius: 14px;
+  background: #f3ece0;
+  font: inherit;
+  color: #2e2118;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  background: var(--cream-2);
-  border: 3px solid var(--fpc);
-  border-radius: 16px;
-  padding: 1rem 0.8rem;
-  text-align: center;
-  color: var(--fpc);
-  box-shadow: 0 16px 30px -22px rgba(44, 30, 20, 0.4);
+  gap: 8px;
+  padding: 12px;
+  transition:
+    transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.45s,
+    background 0.45s;
+  box-shadow: 0 10px 24px -16px rgba(46, 33, 24, 0.35);
 }
-.fp-card h4 {
+.jr-cardin:focus-visible {
+  outline: 2px solid #2e2118;
+  outline-offset: 4px;
+}
+.jr-title {
   font-family: var(--serif);
-  font-size: 1.02rem;
-  line-height: 1.3;
-  color: var(--espresso);
+  font-size: 20px;
   font-weight: 500;
-}
-/* Diamond number badge sitting on the path. */
-.fp-num {
-  position: relative;
-  z-index: 2;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--fpc);
-  transform: rotate(45deg);
-  border-radius: 6px;
-  box-shadow: 0 10px 20px -12px rgba(44, 30, 20, 0.55);
-}
-.fp-num i {
-  transform: rotate(-45deg);
-  font-style: normal;
-  font-family: var(--sans);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: var(--cream);
-}
-.fp-text {
-  font-size: 0.8rem;
-  line-height: 1.5;
-  color: var(--ink);
-  font-weight: 400;
+  line-height: 1.15;
   text-align: center;
-  max-width: 175px;
 }
-/* The snaking path + arrowhead. */
-.fp-wrap {
+.jr-cap {
   position: absolute;
-  left: -12px;
-  right: calc(-1 * var(--fp-gap) + 4px);
-  z-index: 1;
-  pointer-events: none;
-  border-left: 3px solid var(--fpc);
+  left: 18px;
+  width: 164px;
+  margin: 0;
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: #3b2d22;
+  opacity: 0;
 }
-.fp-step.is-top .fp-wrap {
-  top: 36px;
-  height: 96px;
-  border-top: 3px solid var(--fpc);
-  border-top-left-radius: 26px;
+.jr-odd .jr-cap {
+  top: 238px;
 }
-.fp-step.is-bottom .fp-wrap {
-  bottom: 36px;
-  height: 96px;
-  border-bottom: 3px solid var(--fpc);
-  border-bottom-left-radius: 26px;
+.jr-even .jr-cap {
+  top: 20px;
 }
-.fp-wrap::after {
+/* A spark of light that travels each path on a loop after the intro. */
+.jr-spark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%;
+  background: #fffdf8;
+  box-shadow:
+    0 0 0 3px var(--jc),
+    0 0 14px 4px var(--jc);
+  opacity: 0;
+  offset-rotate: 0deg;
+}
+.jr-odd .jr-spark {
+  offset-path: path("M6 150 V58 Q6 40 24 40 H210");
+}
+.jr-even .jr-spark {
+  offset-path: path("M6 166 V258 Q6 276 24 276 H210");
+}
+
+@keyframes jrDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes jrPop {
+  0% {
+    opacity: 0;
+    transform: rotate(-45deg) scale(0.2);
+  }
+  70% {
+    opacity: 1;
+    transform: rotate(52deg) scale(1.12);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(45deg) scale(1);
+  }
+}
+@keyframes jrRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes jrFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes jrHead {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes jrSpark {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+@keyframes jrRing {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+@keyframes jrFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Intro, only once in view */
+.is-in .jr-line {
+  animation: jrDraw 0.9s cubic-bezier(0.6, 0, 0.25, 1) var(--d) forwards;
+}
+.is-in .jr-dwrap {
+  animation: jrPop 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--d) + 0.2s)
+    forwards;
+}
+.is-in .jr-card {
+  animation: jrRise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--d) + 0.1s)
+    forwards;
+}
+.is-in .jr-cap {
+  animation: jrFade 0.6s ease-out calc(var(--d) + 0.55s) forwards;
+}
+.is-in .jr-head {
+  animation: jrHead 0.35s ease-out calc(var(--d) + 0.75s) forwards;
+}
+.is-in .jr-spark {
+  animation: jrSpark 2.8s cubic-bezier(0.45, 0, 0.55, 1) calc(var(--d) + 4s)
+    infinite;
+}
+
+/* Active + hover */
+.jr-col.is-active .jr-line {
+  stroke-width: 3.2;
+}
+.jr-col.is-active .jr-dia {
+  transform: scale(1.14);
+  box-shadow: 0 12px 24px -8px rgba(46, 33, 24, 0.55);
+}
+.jr-col.is-active .jr-dia::after {
   content: "";
   position: absolute;
-  right: -3px;
-  border-top: 7px solid transparent;
-  border-bottom: 7px solid transparent;
-  border-left: 11px solid var(--fpc);
+  inset: -7px;
+  border: 2px solid currentColor;
+  border-radius: 12px;
+  animation: jrRing 1.8s ease-out infinite;
 }
-.fp-step.is-top .fp-wrap::after {
-  top: -8.5px;
+.jr-col.is-active .jr-cardin,
+.jr-cardin:hover {
+  background: #fffdf8;
+  transform: translateY(-7px);
+  box-shadow: 0 22px 40px -20px rgba(46, 33, 24, 0.55);
 }
-.fp-step.is-bottom .fp-wrap::after {
-  bottom: -8.5px;
+.jr-col.is-active .jr-ico {
+  animation: jrFloat 2.2s ease-in-out infinite;
 }
-/* The last step's arrow has nowhere to hook — end it just past the card. */
-.fp-step:last-child .fp-wrap {
-  right: -16px;
+.jr-col.is-active .jr-cap {
+  color: #2e2118;
+  font-weight: 500;
 }
-@media (max-width: 1400px) {
-  /* Tighter weave before the layout gives up the horizontal band. */
-  .fp-flow {
-    --fp-gap: 1.5rem;
-  }
-  .fp-card {
-    padding: 0.9rem 0.6rem;
-  }
-  .fp-card h4 {
-    font-size: 0.92rem;
-  }
-  .fp-text {
-    font-size: 0.74rem;
+
+.jr-replay {
+  appearance: none;
+  border: 1.5px solid #2e2118;
+  background: transparent;
+  color: #2e2118;
+  border-radius: 999px;
+  min-height: 44px;
+  padding: 0 22px;
+  font: 500 12px/1 var(--sans);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition:
+    background 0.25s,
+    color 0.25s;
+}
+.jr-replay:hover {
+  background: #2e2118;
+  color: #f6f1e7;
+}
+.jr-replay:focus-visible {
+  outline: 2px solid #b8862b;
+  outline-offset: 3px;
+}
+
+/* The row is a fixed 1220px drawing; scale it down whole on smaller screens. */
+@media (max-width: 1300px) {
+  .jr-stage {
+    zoom: 0.86;
   }
 }
 @media (max-width: 1100px) {
-  /* Vertical chain: cards stack, the path work is hidden, arrows run down. */
-  .fp-flow {
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
+  .jr-stage {
+    zoom: 0.72;
   }
-  .fp-step {
-    max-width: 420px;
+}
+@media (max-width: 900px) {
+  .jr-stage {
+    zoom: 0.6;
+  }
+}
+@media (max-width: 760px) {
+  .jr-stage {
+    zoom: 1;
     width: 100%;
-    grid-template-rows: none;
+    grid-template-columns: 1fr;
+    row-gap: 22px;
   }
-  .fp-wrap {
+  .jr-col {
+    height: auto;
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    column-gap: 16px;
+    row-gap: 8px;
+    align-items: center;
+  }
+  .jr-svg,
+  .jr-spark {
     display: none;
   }
-  .fp-zone {
-    padding: 0.6rem 0;
+  .jr-dwrap,
+  .jr-card,
+  .jr-cap {
+    position: static;
   }
-  .fp-step .fp-zone:first-child {
-    order: 1;
+  .jr-dwrap {
+    grid-row: 1 / span 2;
+    margin-left: 6px;
   }
-  .fp-card {
-    order: 2;
+  .jr-card {
+    width: auto;
+    height: 96px;
   }
-  .fp-step .fp-zone:last-of-type {
-    order: 3;
+  .jr-cap {
+    width: auto;
+    text-align: left;
+    grid-column: 2;
   }
-  .fp-step + .fp-step::before {
-    content: "⟶";
-    display: block;
-    text-align: center;
-    transform: rotate(90deg);
-    color: var(--gold);
-    font-size: 1.6rem;
-    margin: 0.7rem auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .jr *,
+  .jr *::before,
+  .jr *::after {
+    animation: none !important;
+    transition: none !important;
   }
-  /* Stacked cards have room again — undo the tight-weave shrink. */
-  .fp-card {
-    padding: 1.1rem 1rem;
+  .jr-line {
+    stroke-dashoffset: 0;
   }
-  .fp-card h4 {
-    font-size: 1.05rem;
-  }
-  .fp-text {
-    font-size: 0.82rem;
-    max-width: 300px;
+  .jr-head,
+  .jr-dwrap,
+  .jr-card,
+  .jr-cap {
+    opacity: 1;
   }
 }
 
@@ -1728,7 +1956,17 @@ section.block {
   color: var(--cream);
   border-color: var(--espresso);
 }
+/* Optional plan photo, bled to the card edges above the name. */
+.tier-img {
+  margin: -2.8rem -2.2rem 1.8rem;
+  aspect-ratio: 16 / 10;
+  background-color: var(--stone);
+  background-size: cover;
+  background-position: center;
+}
 .tier .flag {
+  z-index: 1;
+
   position: absolute;
   top: -1px;
   right: 0;
@@ -3961,6 +4199,76 @@ footer ul li a:hover {
   text-align: center;
   font-family: var(--sans);
 }
+/* Two-photo pill: the top photo is cut along a wave that the honey/cream
+   splash band (top 40%–60%) sits on, so the seam never shows. The mask's
+   lower 50 units map onto the splash's 0–40 viewBox (y × 1.25 + 100). */
+/* Both product shots have the mat in their lower third, so each crop zooms
+   in there; the top one ends at 90% of its box so its mat clears the band. */
+.l40-duo-photo {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+.l40-duo-b {
+  top: 40%;
+  bottom: 0;
+  background-size: auto 165%;
+  background-position: 50% 98%;
+}
+.l40-duo-a-img {
+  position: absolute;
+  inset: 0 0 10%;
+  background-size: auto 150%;
+  background-position: 50% 100%;
+}
+.l40-duo-a {
+  top: 0;
+  height: 60%;
+  background: #e9e5df;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 150' preserveAspectRatio='none'%3E%3Cpath d='M0 128.75C14 115 26 135 40 126.25S66 112.5 78 123.75S94 132.5 100 122.5V0H0Z'/%3E%3C/svg%3E")
+    0 0 / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 150' preserveAspectRatio='none'%3E%3Cpath d='M0 128.75C14 115 26 135 40 126.25S66 112.5 78 123.75S94 132.5 100 122.5V0H0Z'/%3E%3C/svg%3E")
+    0 0 / 100% 100% no-repeat;
+}
+.l40-duo-splash {
+  position: absolute;
+  left: -2%;
+  width: 104%;
+  top: 40%;
+  height: 20%;
+  filter: drop-shadow(0 6px 10px rgba(44, 30, 20, 0.35));
+}
+.l40-duo-splash-gold {
+  fill: var(--gold);
+}
+.l40-duo-splash-cream {
+  fill: var(--cream);
+}
+.l40-duo-drop {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 3px 6px rgba(44, 30, 20, 0.3);
+}
+.l40-duo-drop-1 {
+  width: 11px;
+  height: 11px;
+  top: 38%;
+  left: 68%;
+}
+.l40-duo-drop-2 {
+  width: 6px;
+  height: 6px;
+  top: 35.5%;
+  left: 78%;
+  background: var(--cream);
+}
+.l40-duo-drop-3 {
+  width: 8px;
+  height: 8px;
+  top: 61.5%;
+  left: 24%;
+}
 @keyframes l40Rise {
   to {
     opacity: 1;
@@ -4045,3 +4353,346 @@ footer ul li a:hover {
 
 
 
+
+/* ==========================================================================
+   L40 HERO — phone layout: diffused arch deck
+   Below 760px the pill row and plain CTA give way to <HeroArchDeck>: a fanned
+   deck of cards over drifting blurred light, with the headline rising in
+   line by line.
+   ========================================================================== */
+.l40-h1-line {
+  display: block;
+}
+.l40-hero-orbs,
+.l40-deck-wrap {
+  display: none;
+}
+
+@keyframes l40DeckRise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+    filter: blur(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+@keyframes l40DeckLine {
+  from {
+    width: 0;
+  }
+  to {
+    width: 28px;
+  }
+}
+@keyframes l40DeckFill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+@keyframes l40Drift1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(60px, 40px) scale(1.15);
+  }
+}
+@keyframes l40Drift2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1.1);
+  }
+  50% {
+    transform: translate(-50px, -30px) scale(0.9);
+  }
+}
+@keyframes l40Drift3 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(30px, -60px);
+  }
+}
+
+@media (max-width: 760px) {
+  .l40-hero {
+    padding: 6.25rem 0 2rem;
+    background: #f5efe4;
+  }
+  .l40-hero::before {
+    display: none;
+  }
+
+  /* Diffused light field */
+  .l40-hero-orbs {
+    display: block;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .l40-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(56px);
+  }
+  .l40-orb-1 {
+    width: 320px;
+    height: 320px;
+    left: -120px;
+    top: 120px;
+    background: var(--olive-deep);
+    opacity: 0.32;
+    animation: l40Drift1 14s ease-in-out infinite;
+  }
+  .l40-orb-2 {
+    width: 280px;
+    height: 280px;
+    right: -110px;
+    top: 360px;
+    background: #c9a45c;
+    opacity: 0.38;
+    animation: l40Drift2 17s ease-in-out infinite;
+  }
+  .l40-orb-3 {
+    width: 300px;
+    height: 300px;
+    left: 40px;
+    top: 640px;
+    background: #b5774e;
+    opacity: 0.26;
+    animation: l40Drift3 19s ease-in-out infinite;
+  }
+  .l40-orb-4 {
+    width: 220px;
+    height: 220px;
+    right: -60px;
+    top: 760px;
+    background: #1f4d40;
+    opacity: 0.22;
+    animation: l40Drift1 21s ease-in-out infinite reverse;
+  }
+
+  /* Copy */
+  .l40-hero-in {
+    gap: 0;
+    padding: 0 24px;
+    z-index: 1;
+  }
+  .l40-hero-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+  .l40-hero-copy .eyebrow {
+    margin-bottom: 0;
+    gap: 10px;
+    font-size: 0.6875rem;
+    letter-spacing: 0.36em;
+    white-space: nowrap;
+    color: #4e5c31;
+  }
+  .l40-hero-copy .eyebrow::before {
+    width: 0;
+    opacity: 1;
+    background: var(--olive-deep);
+    animation: l40DeckLine 1s 0.2s ease forwards;
+  }
+  .l40-hero-h1 {
+    font-size: 2.75rem;
+    line-height: 1.02;
+    letter-spacing: -0.011em;
+  }
+  .l40-hero-h1 .amp {
+    font-size: 1.136em;
+    font-weight: 500;
+    text-transform: none;
+    transform: none;
+  }
+  .l40-deck-rise {
+    opacity: 0;
+    animation: l40DeckRise 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  }
+  .l40-hero-cta,
+  .l40-hero-pills {
+    display: none;
+  }
+
+  /* CTA + counter */
+  .l40-deck-wrap {
+    display: block;
+  }
+  .l40-deck-cta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 18px;
+  }
+  .l40-deck-btn {
+    height: 46px;
+    padding: 0 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--espresso);
+    border-radius: 999px;
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--espresso);
+    background: rgba(245, 239, 228, 0.5);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    transition:
+      background 0.3s,
+      color 0.3s;
+  }
+  .l40-deck-btn:hover {
+    background: var(--espresso);
+    color: #f6f1e7;
+  }
+  .l40-deck-count {
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    color: #5e5046;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Arch deck — full-bleed so the side cards can run off the screen edge */
+  .l40-deck {
+    position: relative;
+    z-index: 4;
+    height: 400px;
+    margin: 24px -24px 0;
+    touch-action: pan-y;
+  }
+  .l40-deck-card {
+    position: absolute;
+    left: 50%;
+    top: 14px;
+    width: 220px;
+    height: 360px;
+    margin-left: -110px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 0.9s cubic-bezier(0.22, 0.8, 0.2, 1),
+      filter 0.9s ease,
+      opacity 0.9s ease;
+  }
+  .l40-deck-frame {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 28px;
+    background: #e9dfcf;
+  }
+  /* Inset hairline drawn above the photo, which would cover an outline. */
+  .l40-deck-frame::after {
+    content: "";
+    position: absolute;
+    inset: 7px;
+    z-index: 2;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 21px;
+    pointer-events: none;
+  }
+  .l40-deck-img {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* Caption + progress */
+  .l40-deck-foot {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .l40-deck-caps {
+    position: relative;
+    width: 100%;
+    height: 44px;
+  }
+  .l40-deck-cap {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: var(--sans);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.27em;
+    text-transform: uppercase;
+    color: var(--espresso);
+    transition:
+      opacity 0.6s ease,
+      transform 0.6s ease;
+  }
+  .l40-deck-progress {
+    display: flex;
+    gap: 6px;
+    width: 200px;
+  }
+  .l40-deck-bar {
+    flex-grow: 1;
+    height: 2px;
+    background: rgba(43, 31, 23, 0.15);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .l40-deck-bar-done {
+    width: 100%;
+    height: 100%;
+    background: var(--espresso);
+  }
+  .l40-deck-bar-fill {
+    width: 0;
+    height: 100%;
+    background: var(--olive-deep);
+    animation: l40DeckFill linear forwards;
+  }
+}
+
+@media (max-width: 760px) and (prefers-reduced-motion: reduce) {
+  .l40-orb,
+  .l40-hero-copy .eyebrow::before {
+    animation: none;
+  }
+  .l40-hero-copy .eyebrow::before {
+    width: 28px;
+  }
+  .l40-deck-rise {
+    animation-duration: 0.01s;
+  }
+  .l40-deck-card,
+  .l40-deck-cap {
+    transition: none;
+  }
+}

@@ -11,6 +11,7 @@ import {
 } from "@/server/actions/admin/meal-plans";
 import type { AdminMealPlan } from "@/server/queries/admin";
 import { Field, FormError, useAdminAction } from "./admin-form";
+import { ImageUploader, type DraftImage } from "./image-uploader";
 import { Modal } from "./modal";
 import { EmptyRow, PanelHead, StatCards } from "./ui";
 
@@ -172,6 +173,9 @@ function MealPlanDialog({
     isEdit ? updateMealPlanAction : createMealPlanAction,
     { onSuccess: onClose },
   );
+  const [photo, setPhoto] = useState<DraftImage[]>(
+    plan?.imageUrl ? [{ path: plan.imageUrl }] : [],
+  );
 
   return (
     <Modal
@@ -182,6 +186,8 @@ function MealPlanDialog({
     >
       <form action={form.submit} className="a-stack">
         {isEdit && <input type="hidden" name="id" value={plan.id} />}
+        {/* The uploader is a custom control, so its value posts via a hidden input. */}
+        <input type="hidden" name="imageUrl" value={photo[0]?.path ?? ""} />
         <FormError message={form.formError} />
 
         <Field label="Name" htmlFor="plan-name" error={form.fieldErrors?.name}>
@@ -277,6 +283,13 @@ function MealPlanDialog({
             maxLength={2000}
           />
         </Field>
+
+        <ImageUploader
+          value={photo}
+          onChange={setPhoto}
+          max={1}
+          label="Photo — shown on the plan card (optional)"
+        />
 
         <div className="a-grid-2">
           <Field

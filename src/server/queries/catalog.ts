@@ -195,6 +195,8 @@ export interface MealPlanSummary {
   mealsPerWeek: number;
   durationWeeks: number;
   features: string[];
+  /** Optional photo shown at the top of the plan card. */
+  imageUrl: string | null;
 }
 
 export async function getMealPlans(): Promise<MealPlanSummary[]> {
@@ -207,6 +209,7 @@ export async function getMealPlans(): Promise<MealPlanSummary[]> {
       mealsPerWeek: mealPlans.mealsPerWeek,
       durationWeeks: mealPlans.durationWeeks,
       features: mealPlans.features,
+      imageUrl: mealPlans.imageUrl,
     })
     .from(mealPlans)
     .where(eq(mealPlans.active, true))

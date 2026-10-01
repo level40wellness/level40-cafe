@@ -2,7 +2,7 @@
  * Floating WhatsApp enquiry button. A plain wa.me deep link — WhatsApp opens
  * with the greeting prefilled, so no widget script or client JS is needed.
  */
-const WHATSAPP_NUMBER = "971507950331";
+const WHATSAPP_NUMBER = "971557392980";
 const GREETING = "Hi Level 40! I'd like to make an enquiry.";
 
 export function WhatsAppFloat() {

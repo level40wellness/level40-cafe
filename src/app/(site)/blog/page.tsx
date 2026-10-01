@@ -103,12 +103,18 @@ export default async function BlogPage() {
                   <div className="journal-body">
                     <div className="journal-meta">
                       <span>{formatBlogDate(post.publishedAt)}</span>
-                      {post.hashtags[0] && (
-                        <span className="journal-tag">#{post.hashtags[0]}</span>
-                      )}
                     </div>
                     <h3>{post.title}</h3>
                     <p>{post.excerpt}</p>
+                    {post.hashtags.length > 0 && (
+                      <div className="journal-tags">
+                        {post.hashtags.map((tag) => (
+                          <span key={tag} className="journal-tag">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <span className="journal-read">Read the story →</span>
                   </div>
                 </Link>

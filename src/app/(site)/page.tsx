@@ -8,6 +8,8 @@ import { ScrollReveal } from "@/components/scroll-reveal";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { formatBlogDate } from "@/lib/blog";
 import { formatFils } from "@/lib/format";
+import { HeroArchDeck } from "@/components/hero-arch-deck";
+import { HeroPillArt, type HeroPill } from "@/components/hero-pill-art";
 import { HERO_IMG } from "@/lib/images";
 import {
   getMealPlans,
@@ -128,19 +130,28 @@ export default async function HomePage() {
     .slice(0, 4);
   const shopPicks = shopProducts.slice(0, 4);
 
-  const heroPills: Array<{
-    image: string;
-    label: string;
-    href: string;
-    /** background-position for the pill crop; defaults to center */
-    position?: string;
-  }> = [
+  // Hero pills pull their photos from the live catalog by name so they stay in
+  // step with the menu and shop; each falls back to a static image if renamed.
+  const menuImage = (name: string) =>
+    allMenuItems.find((item) => item.name === name)?.imagePath ?? null;
+  const shopImage = (name: string) =>
+    shopProducts.find((product) => product.name === name)?.imagePath ?? null;
+  const retailDuo = [shopImage("Astrological"), shopImage("Pink Floral")];
+
+  const heroPills: HeroPill[] = [
     {
-      image: allMenuItems[0]?.imagePath ?? HERO_IMG.dish1,
+      image:
+        menuImage("Cappuccino") ?? allMenuItems[0]?.imagePath ?? HERO_IMG.dish1,
       label: "Healthy Dining & Specialty Coffee",
       href: "/menu",
+      tone: "rgba(120, 82, 40, 0.55)",
     },
-    { image: HERO_IMG.yoga, label: "Holistic Yoga", href: "/services" },
+    {
+      image: HERO_IMG.yoga,
+      label: "Holistic Yoga",
+      href: "/services",
+      tone: "rgba(60, 44, 34, 0.55)",
+    },
     {
       image: HERO_IMG.mealPlan,
       // The branded bag and box sit on the left of the photo; the tall pill
@@ -148,16 +159,21 @@ export default async function HomePage() {
       position: "20% 50%",
       label: "Nutritionist Guided Meal Plans",
       href: "/subscription",
+      tone: "rgba(165, 130, 95, 0.6)",
     },
     {
       image: HERO_IMG.cafeInterior,
       label: "Community & Workshops",
       href: "/about",
+      tone: "rgba(160, 80, 40, 0.55)",
     },
     {
       image: HERO_IMG.retail,
+      duo:
+        retailDuo[0] && retailDuo[1] ? [retailDuo[0], retailDuo[1]] : undefined,
       label: "Neat by Nicky Retail",
       href: "/shop",
+      tone: "rgba(110, 60, 120, 0.5)",
     },
   ];
 
@@ -167,17 +183,48 @@ export default async function HomePage() {
       <WhatsAppFloat />
 
       <section className="l40-hero">
+        {/* Diffused light field — phone layout only. */}
+        <div className="l40-hero-orbs" aria-hidden="true">
+          <span className="l40-orb l40-orb-1" />
+          <span className="l40-orb l40-orb-2" />
+          <span className="l40-orb l40-orb-3" />
+          <span className="l40-orb l40-orb-4" />
+        </div>
         <div className="l40-hero-in">
           <div className="l40-hero-copy">
-            <span className="eyebrow">Welcome to Level 40 — UAE&apos;s</span>
+            <span
+              className="eyebrow l40-deck-rise"
+              style={{ animationDelay: "0.05s" }}
+            >
+              Welcome to Level 40 — UAE&apos;s
+            </span>
+            {/* One block per line so the phone layout can stagger them in;
+                the h1 uppercases "Integrated" everywhere but the phone. */}
             <h1 className="l40-hero-h1">
-              FIRST
-              <br />
-              WELLNESS
-              <br />
-              <span className="amp">INTEGRATED</span>
-              <br />
-              <span className="accent">CAFÉ.</span>
+              <span
+                className="l40-h1-line l40-deck-rise"
+                style={{ animationDelay: "0.15s" }}
+              >
+                FIRST
+              </span>
+              <span
+                className="l40-h1-line l40-deck-rise"
+                style={{ animationDelay: "0.28s" }}
+              >
+                WELLNESS
+              </span>
+              <span
+                className="l40-h1-line l40-deck-rise"
+                style={{ animationDelay: "0.41s" }}
+              >
+                <span className="amp">Integrated</span>
+              </span>
+              <span
+                className="l40-h1-line l40-deck-rise"
+                style={{ animationDelay: "0.54s" }}
+              >
+                <span className="accent">CAFÉ.</span>
+              </span>
             </h1>
             {/* <p className="l40-hero-lead">
               A place where exceptional coffee, functional nutrition,
@@ -199,17 +246,13 @@ export default async function HomePage() {
                 className="l40-pill"
                 style={{ animationDelay: `${index * 90}ms` }}
               >
-                <div
-                  className="l40-pill-img"
-                  style={{
-                    backgroundImage: `url('${pill.image}')`,
-                    backgroundPosition: pill.position ?? "center",
-                  }}
-                />
+                <HeroPillArt pill={pill} className="l40-pill-img" />
                 <span className="l40-pill-label">{pill.label}</span>
               </Link>
             ))}
           </div>
+
+          <HeroArchDeck pills={heroPills} ctaHref="/about" />
         </div>
       </section>
 
@@ -563,12 +606,18 @@ export default async function HomePage() {
                   <div className="journal-body">
                     <div className="journal-meta">
                       <span>{formatBlogDate(post.publishedAt)}</span>
-                      {post.hashtags[0] && (
-                        <span className="journal-tag">#{post.hashtags[0]}</span>
-                      )}
                     </div>
                     <h3>{post.title}</h3>
                     <p>{post.excerpt}</p>
+                    {post.hashtags.length > 0 && (
+                      <div className="journal-tags">
+                        {post.hashtags.map((tag) => (
+                          <span key={tag} className="journal-tag">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <span className="journal-read">Read the story →</span>
                   </div>
                 </Link>

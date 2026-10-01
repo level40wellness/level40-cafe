@@ -77,7 +77,7 @@ export function MenuBrowser({ categories }: { categories: MenuCategory[] }) {
                 {item.nutrition && (
                   <div className="nutri-row">
                     {item.nutrition
-                      .split(",")
+                      .split(/[,|;•]/)
                       .map((fact) => fact.trim())
                       .filter(Boolean)
                       .map((fact) => (

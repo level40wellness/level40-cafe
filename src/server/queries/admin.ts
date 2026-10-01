@@ -194,6 +194,7 @@ export async function getAdminMealPlans() {
       mealsPerWeek: mealPlans.mealsPerWeek,
       durationWeeks: mealPlans.durationWeeks,
       features: mealPlans.features,
+      imageUrl: mealPlans.imageUrl,
       sortOrder: mealPlans.sortOrder,
       active: mealPlans.active,
       subscriberCount: sql<number>`count(${subscriptions.id}) filter (

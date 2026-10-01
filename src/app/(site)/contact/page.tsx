@@ -4,6 +4,7 @@ import { ContactForm } from "@/components/contact-form";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { HERO_IMG } from "@/lib/images";
 import { MAP_QUERY } from "@/lib/site";
+import { getMenu } from "@/server/queries/catalog";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -11,15 +12,27 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
 };
 
+/** Revalidated like /menu so the banner follows menu photo changes. */
+export const revalidate = 300;
 
-export default function ContactPage() {
+/** Menu dish shown in the banner; falls back to the interior if it is renamed. */
+const HERO_DISH = "Korean Tofu Scramble Bowl";
+
+export default async function ContactPage() {
+  const menu = await getMenu();
+  const heroImage =
+    menu
+      .flatMap((category) => category.products)
+      .find((item) => item.name === HERO_DISH)?.imagePath ??
+    HERO_IMG.cafeInterior;
+
   return (
     <>
       <ScrollReveal threshold={0.08} />
 
       <section
         className="page-hero"
-        style={{ backgroundImage: `url('${HERO_IMG.dish1}')` }}
+        style={{ backgroundImage: `url('${heroImage}')` }}
       >
         <div className="inner">
           <span className="eyebrow center">Contact</span>
@@ -50,7 +63,7 @@ export default function ContactPage() {
             <div className="c-card reveal">
               <div className="ic">📞</div>
               <h4>Call us</h4>
-              <p>+971 4 000 0000</p>
+              <p>+971 55 739 2980</p>
             </div>
             <div className="c-card reveal">
               <div className="ic">✉️</div>

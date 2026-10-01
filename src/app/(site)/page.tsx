@@ -275,13 +275,13 @@ export default async function HomePage() {
               image: allMenuItems[0]?.imagePath ?? HERO_IMG.dish1,
               label: "Healthy Dining",
             },
-            { image: "/images/menu/bev-1.jpg", label: "Specialty Coffee" },
+            { image: "/images/menu/turmeric-latte.jpg", label: "Turmeric Latte" },
             {
               image: HERO_IMG.mealPlan,
               label: "Personalized Nutrition",
             },
             { image: HERO_IMG.yoga, label: "Holistic Yoga" },
-            { image: HERO_IMG.retail, label: "NEAT by Nicky" },
+            { image: retailDuo[0] ?? HERO_IMG.retail, label: "NEAT by Nicky" },
             {
               image: HERO_IMG.cafeInterior,
               label: "Community & Experiences",

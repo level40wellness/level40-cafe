@@ -29,6 +29,13 @@ export const isGoogleEnabled = Boolean(
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
+  // Sign-in rejects any Origin other than baseURL with "Invalid origin". The
+  // site answers on both the bare and www hostnames, so both must be listed
+  // whichever one BETTER_AUTH_URL names.
+  trustedOrigins: [
+    "https://level40wellness.com",
+    "https://www.level40wellness.com",
+  ],
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: { user, session, account, verification, rateLimit },

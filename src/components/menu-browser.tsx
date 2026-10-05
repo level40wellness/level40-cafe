@@ -80,8 +80,8 @@ export function MenuBrowser({ categories }: { categories: MenuCategory[] }) {
                       .split(/[,|;•]/)
                       .map((fact) => fact.trim())
                       .filter(Boolean)
-                      .map((fact) => (
-                        <span key={fact} className="nutri-pill">
+                      .map((fact, position) => (
+                        <span key={`${fact}-${position}`} className="nutri-pill">
                           {fact}
                         </span>
                       ))}

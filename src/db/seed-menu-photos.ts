@@ -16,7 +16,7 @@ import { categories, imageAssets, productImages, products } from "@/db/schema";
  *
  *   npm run db:seed-menu                        dry run, writes nothing
  *   npm run db:seed-menu -- --apply             replace the menu (first load only)
- *   npm run db:seed-menu -- --add-new           list the photos in new/ to add
+ *   npm run db:seed-menu -- --add-new           list the NEW_ITEMS photos to add
  *   npm run db:seed-menu -- --add-new --confirm add them, touching nothing else
  *   npm run db:seed-menu -- --delete-old-images            list photos safe to remove
  *   npm run db:seed-menu -- --delete-old-images --confirm  remove them from Blob
@@ -99,19 +99,23 @@ const MENU: Section[] = [
 
 /**
  * Later additions from the "new" sub-folder. Loaded by --add-new, which only
- * inserts: existing items, admin edits and categories are left as they are,
- * and an item whose name is already on the café menu is skipped, so a re-run
- * never duplicates.
+ * inserts: existing items, admin edits and categories are left as they are.
+ * An item is skipped when its name is already on the café menu or its photo
+ * was already uploaded and attached — the latter catches items admin renamed.
+ * Earlier batches are removed from the list once loaded (the first, from the
+ * photo folder's new/, went in on 2026-09-30; its photos are no longer on disk).
  */
-const NEW_DIR = "new";
-const NEW_ITEMS: Array<Item & { section: string }> = [
-  { file: "Level 40 goddess toast-59.png", name: "Level 40 Goddess Toast", aed: 59, section: "Breakfast" },
-  { file: "Protein Pancake - 52.png", name: "Protein Pancake", aed: 52, section: "Breakfast" },
-  { file: "Tofu Scramble- 49.png", name: "Tofu Scramble", aed: 49, section: "Breakfast" },
-  { file: "Wild mushroom toast - 38.png", name: "Wild Mushroom Toast", aed: 38, section: "Breakfast" },
-  { file: "Pumpkin Soup-35.png", name: "Pumpkin Soup", aed: 35, section: "Soups" },
-  { file: "Level 40 wellness bowl - 44.png", name: "Level 40 Wellness Bowl", aed: 44, section: "Bowls, Salads & Wraps" },
-  { file: "Paneer Burger-55.png", name: "Paneer Burger", aed: 55, section: "Burgers" },
+type NewItem = Item & { section: string; dir: string };
+const BATCH_2 = path.join(process.cwd(), "new-items");
+const NEW_ITEMS: NewItem[] = [
+  { file: "Banana Restore-34.png", name: "Banana Restore", aed: 34, section: "Smoothies", dir: BATCH_2 },
+  { file: "Berry Velvet-34.png", name: "Berry Velvet", aed: 34, section: "Smoothies", dir: BATCH_2 },
+  { file: "Chocolate Cookie Crush-34.png", name: "Chocolate Cookie Crush", aed: 34, section: "Smoothies", dir: BATCH_2 },
+  { file: "Cocoa Power-34.png", name: "Cocoa Power", aed: 34, section: "Smoothies", dir: BATCH_2 },
+  { file: "Golden fuel -32.png", name: "Golden Fuel", aed: 32, section: "Smoothies", dir: BATCH_2 },
+  { file: "Berry Recharge-38.png", name: "Berry Recharge", aed: 38, section: "Smoothies", dir: BATCH_2 },
+  { file: "Tropical Blush -38.png", name: "Tropical Blush", aed: 38, section: "Smoothies", dir: BATCH_2 },
+  { file: "Cold Brew Boost -40.png", name: "Cold Brew Boost", aed: 40, section: "Smoothies", dir: BATCH_2 },
 ];
 
 const slugify = (value: string) =>
@@ -137,8 +141,7 @@ function backup(label: string, data: unknown) {
   console.log(`backup     : ${path.relative(process.cwd(), file)}`);
 }
 
-async function uploadPhoto(file: string): Promise<string> {
-  const originalName = ASSET_PREFIX + file;
+async function uploadPhoto(file: string, dir = PHOTO_DIR, originalName = ASSET_PREFIX + file): Promise<string> {
   const [existing] = await db
     .select({ url: imageAssets.url })
     .from(imageAssets)
@@ -146,7 +149,7 @@ async function uploadPhoto(file: string): Promise<string> {
     .limit(1);
   if (existing) return existing.url;
 
-  const webp = await sharp(readFileSync(path.join(PHOTO_DIR, file)))
+  const webp = await sharp(readFileSync(path.join(dir, file)))
     .resize({ width: 1000, withoutEnlargement: true })
     .webp({ quality: 82 })
     .toBuffer();
@@ -248,12 +251,23 @@ async function apply() {
 
 async function addNew() {
   const { cafeCategories, cafeProducts } = await snapshot();
-  for (const item of NEW_ITEMS) readFileSync(path.join(PHOTO_DIR, NEW_DIR, item.file)); // throws if missing
 
   const existingNames = new Set(cafeProducts.map((row) => row.name.trim().toLowerCase()));
+  const attachedPaths = new Set(cafeProducts.flatMap((row) => row.images.map((image) => image.path)));
+  const loadedAssets = new Set(
+    (await db.select().from(imageAssets))
+      .filter((row) => attachedPaths.has(row.url))
+      .map((row) => row.originalName),
+  );
+  const assetNameOf = (item: NewItem) =>
+    ASSET_PREFIX + path.relative(PHOTO_DIR, path.join(item.dir, item.file)).split(path.sep).join("/");
+  const alreadyLoaded = (item: NewItem) =>
+    existingNames.has(item.name.toLowerCase()) || loadedAssets.has(assetNameOf(item));
   const bySlug = new Map(cafeCategories.map((row) => [row.slug.toLowerCase(), row]));
-  const todo = NEW_ITEMS.filter((item) => !existingNames.has(item.name.toLowerCase()));
-  const skipped = NEW_ITEMS.filter((item) => existingNames.has(item.name.toLowerCase()));
+  const todo = NEW_ITEMS.filter((item) => !alreadyLoaded(item));
+  const skipped = NEW_ITEMS.filter(alreadyLoaded);
+  // Only photos still to load must exist; earlier batches' folders may be gone.
+  for (const item of todo) readFileSync(path.join(item.dir, item.file)); // throws if missing
 
   for (const item of todo) {
     const category = bySlug.get(slugify(item.section));
@@ -272,7 +286,7 @@ async function addNew() {
   backup("before-add-new", { cafeCategories, cafeProducts });
 
   const urls = new Map<string, string>();
-  for (const item of todo) urls.set(item.file, await uploadPhoto(`${NEW_DIR}/${item.file}`));
+  for (const item of todo) urls.set(item.file, await uploadPhoto(item.file, item.dir, assetNameOf(item)));
 
   const maxCategorySort = Math.max(0, ...cafeCategories.map((row) => row.sortOrder));
   const nextSort = new Map<string, number>();

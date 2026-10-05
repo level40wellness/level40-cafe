@@ -10,9 +10,13 @@ import {
 } from "@/server/actions/admin/import";
 import { Modal } from "./modal";
 import { importMenuAction } from "@/server/actions/admin/menu-import";
+import { MenuPhotoImportButton } from "./menu-photo-import";
 
 interface Kind {
   kind: string;
+  /** Café only: feeds the photo importer's category picker and name matching. */
+  categories?: { id: string; name: string; active: boolean }[];
+  existing?: { name: string; categoryId: string | null }[];
 }
 
 /**
@@ -21,7 +25,7 @@ interface Kind {
  * manager. Export/template are plain links to the admin GET route; only the
  * upload needs a dialog.
  */
-export function ProductImportBar({ kind }: Kind) {
+export function ProductImportBar({ kind, categories = [], existing = [] }: Kind) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -55,6 +59,13 @@ export function ProductImportBar({ kind }: Kind) {
       >
         <Upload size={15} aria-hidden="true" /> Import CSV
       </button>
+      {kind === "cafe" && (
+        <MenuPhotoImportButton
+          categories={categories}
+          existing={existing}
+          disabled={categories.length === 0}
+        />
+      )}
       {open && <ImportDialog onClose={() => setOpen(false)} kind={kind} />}
     </>
   );

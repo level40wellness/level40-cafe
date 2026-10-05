@@ -268,3 +268,214 @@ dialog.a-modal-overlay::backdrop {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* Toolbar on the menu page now carries six controls; let it wrap instead of
+   pushing the page wider than the viewport. */
+.a-panel-head .tools {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 0.6rem;
+}
+
+/* Menu photo importer (admin/menu → Import photos). */
+.a-mpi-guide {
+  border: 1px solid rgba(122, 90, 67, 0.16);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 0.88rem;
+}
+.a-mpi-guide summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.95rem;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--espresso);
+}
+.a-mpi-guide-body {
+  padding: 0 0.95rem 0.9rem;
+  display: grid;
+  gap: 0.65rem;
+  color: var(--cocoa);
+  line-height: 1.5;
+}
+.a-mpi-guide-body ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+.a-mpi-guide-body code {
+  background: rgba(212, 168, 67, 0.16);
+  border-radius: 5px;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.82rem;
+  word-break: break-all;
+}
+.a-mpi-pattern {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  background: rgba(122, 90, 67, 0.06);
+  font-size: 0.9rem;
+}
+.a-mpi-pattern b {
+  color: var(--espresso);
+  font-weight: 600;
+}
+.a-mpi-pattern i {
+  color: var(--gold);
+  font-style: normal;
+  font-weight: 700;
+  padding: 0 0.1rem;
+}
+.a-mpi-drop {
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  border: 2px dashed rgba(122, 90, 67, 0.3);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--cocoa);
+  transition: 0.18s ease;
+}
+.a-mpi-drop strong {
+  color: var(--espresso);
+}
+.a-mpi-drop.is-over {
+  border-color: var(--gold);
+  background: rgba(212, 168, 67, 0.12);
+}
+.a-mpi-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+  max-height: 46vh;
+  overflow-y: auto;
+  padding-right: 0.2rem;
+}
+.a-mpi-row {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 0.85rem;
+  align-items: start;
+  padding: 0.8rem;
+  border-radius: 14px;
+  border: 1px solid rgba(122, 90, 67, 0.16);
+  background: #fff;
+}
+.a-mpi-row.is-off {
+  opacity: 0.55;
+}
+.a-mpi-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(122, 90, 67, 0.1);
+}
+.a-mpi-thumb img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  display: block;
+}
+.a-mpi-fields {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+.a-mpi-fields .a-input {
+  padding: 0.5rem 0.7rem;
+  font-size: 0.86rem;
+}
+.a-mpi-line {
+  display: grid;
+  grid-template-columns: 1fr 92px;
+  gap: 0.45rem;
+}
+.a-mpi-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+}
+.a-mpi-cat {
+  min-width: 170px;
+}
+.a-mpi-file {
+  margin-left: auto;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.a-mpi-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #8a6a12;
+}
+.a-mpi-note.is-error {
+  color: #a85f43;
+}
+.a-mpi-actions {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: center;
+}
+.a-mpi-progress {
+  display: grid;
+  gap: 0.4rem;
+}
+.a-mpi-bar {
+  height: 8px;
+  border-radius: 100px;
+  background: rgba(122, 90, 67, 0.14);
+  overflow: hidden;
+}
+.a-mpi-bar span {
+  display: block;
+  height: 100%;
+  background: var(--gold);
+  border-radius: 100px;
+  transition: width 0.25s ease;
+}
+.a-mpi-summary {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: rgba(139, 154, 91, 0.16);
+  border: 1px solid rgba(139, 154, 91, 0.4);
+  color: #3f4d26;
+}
+@media (max-width: 560px) {
+  .a-mpi-row {
+    grid-template-columns: 48px 1fr;
+  }
+  .a-mpi-thumb,
+  .a-mpi-thumb img {
+    width: 48px;
+    height: 48px;
+  }
+  .a-mpi-actions {
+    grid-column: 1 / -1;
+    grid-auto-flow: column;
+    justify-content: end;
+  }
+  .a-mpi-file {
+    margin-left: 0;
+  }
+}
+.a-mpi-pills {
+  margin: 0;
+}

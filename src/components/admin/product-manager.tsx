@@ -160,8 +160,11 @@ export function ProductManager({
             {remove.pending ? "Deleting…" : `Delete ${selected.size}`}
           </button>
         )}
-        {/* Bulk CSV upload/export is retail-only; the café menu is edited by hand. */}
-        <ProductImportBar kind={kind} />
+        <ProductImportBar
+          kind={kind}
+          categories={categories}
+          existing={items.map((item) => ({ name: item.name, categoryId: item.categoryId }))}
+        />
         <button
           type="button"
           className="a-btn primary"

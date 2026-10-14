@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { formatBlogDate } from "@/lib/blog";
 import { HERO_IMG } from "@/lib/images";
+import { coverImage } from "@/lib/optimised-image";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { getBlogPost, getBlogPosts } from "@/server/queries/blog";
 
@@ -84,7 +85,7 @@ export default async function BlogPostPage({ params }: Props) {
           gradient like every other page header. */}
       <section
         className="page-hero"
-        style={{ backgroundImage: `url('${cover ?? HERO_IMG.chef}')` }}
+        style={cover ? coverImage(cover, 1920) : { backgroundImage: `url('${HERO_IMG.chef}')` }}
       >
         <div className="inner">
           <span className="eyebrow center">Journal</span>
@@ -125,7 +126,7 @@ export default async function BlogPostPage({ params }: Props) {
                   <div
                     key={image}
                     className="journal-gallery-img"
-                    style={{ backgroundImage: `url('${image}')` }}
+                    style={coverImage(image, 1080)}
                   />
                 ))}
               </div>

@@ -8,6 +8,7 @@ import { ScrollReveal } from "@/components/scroll-reveal";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { formatBlogDate } from "@/lib/blog";
 import { formatFils } from "@/lib/format";
+import { coverImage } from "@/lib/optimised-image";
 import { HeroArchDeck } from "@/components/hero-arch-deck";
 import { HeroPillArt, type HeroPill } from "@/components/hero-pill-art";
 import { HERO_IMG } from "@/lib/images";
@@ -372,11 +373,7 @@ export default async function HomePage() {
               <div
                 key={item.id}
                 className="dish reveal"
-                style={
-                  item.imagePath
-                    ? { backgroundImage: `url('${item.imagePath}')` }
-                    : undefined
-                }
+                style={coverImage(item.imagePath, 1080)}
               >
                 <div className="body">
                   <h3>{item.name}</h3>
@@ -481,11 +478,7 @@ export default async function HomePage() {
                 <Link href={`/shop/${product.id}`} aria-label={product.name}>
                   <div
                     className="ph"
-                    style={
-                      product.imagePath
-                        ? { backgroundImage: `url('${product.imagePath}')` }
-                        : { backgroundColor: "var(--cream-2)" }
-                    }
+                    style={coverImage(product.imagePath, 750, { backgroundColor: "var(--cream-2)" })}
                   >
                     {product.categoryName ? (
                       <span className="badge">{product.categoryName}</span>
@@ -597,11 +590,7 @@ export default async function HomePage() {
                 >
                   <div
                     className="journal-cover"
-                    style={
-                      post.images[0]
-                        ? { backgroundImage: `url('${post.images[0]}')` }
-                        : undefined
-                    }
+                    style={coverImage(post.images[0], 828)}
                   />
                   <div className="journal-body">
                     <div className="journal-meta">
@@ -651,11 +640,7 @@ export default async function HomePage() {
                 <div key={member.id} className="team-card reveal">
                   <div
                     className="team-photo"
-                    style={
-                      member.imagePath
-                        ? { backgroundImage: `url('${member.imagePath}')` }
-                        : undefined
-                    }
+                    style={coverImage(member.imagePath, 640)}
                   />
                   <h3>{member.name}</h3>
                   <span className="team-role">{member.designation}</span>

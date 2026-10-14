@@ -43,3 +43,6 @@ next-env.d.ts
 
 # local DB backups written by one-off scripts
 /backups/
+
+# originals for the Blob mirror (npm run media:mirror)
+/image-recovery/

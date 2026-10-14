@@ -6,6 +6,7 @@ import { useState } from "react";
 import { AddToCart } from "@/components/add-to-cart";
 import type { ColorOption } from "@/db/schema/catalog";
 import { formatFils } from "@/lib/format";
+import { coverImage } from "@/lib/optimised-image";
 
 export interface ShopItem {
   id: string;
@@ -68,11 +69,7 @@ export function ShopBrowser({
             <Link href={`/shop/${product.id}`} aria-label={product.name}>
               <div
                 className="ph"
-                style={
-                  product.imagePath
-                    ? { backgroundImage: `url('${product.imagePath}')` }
-                    : { backgroundColor: "var(--cream-2)" }
-                }
+                style={coverImage(product.imagePath, 750, { backgroundColor: "var(--cream-2)" })}
               >
                 {product.categoryName ? (
                   <span className="badge">{product.categoryName}</span>

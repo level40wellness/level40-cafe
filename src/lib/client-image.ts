@@ -1,5 +1,5 @@
 /**
- * Browser-only image helpers for the menu photo importer. A phone or design
+ * Browser-only image helpers for admin uploads (photo importer and ImageUploader). A phone or design
  * export is routinely 3–4 MB; the storefront shows it at a few hundred pixels,
  * so shrinking before upload cuts the transfer ~20× and keeps /menu light.
  */
@@ -44,6 +44,13 @@ export async function optimiseForUpload(file: File): Promise<Blob> {
     throw new Error("This photo is over 8 MB and could not be shrunk. Export a smaller copy.");
   }
   return file;
+}
+
+/** The original name with its extension matched to what optimiseForUpload produced. */
+export function uploadName(fileName: string, type: string): string {
+  const stem = fileName.replace(/\.[^.]+$/, "") || "image";
+  const extension = type === "image/webp" ? "webp" : type === "image/jpeg" ? "jpg" : (fileName.split(".").pop() ?? "png");
+  return `${stem}.${extension}`;
 }
 
 /** A ~96px preview, decoded at reduced size so 100 rows never hold 100 full bitmaps. */

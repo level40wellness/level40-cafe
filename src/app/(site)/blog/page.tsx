@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { formatBlogDate } from "@/lib/blog";
 import { HERO_IMG } from "@/lib/images";
+import { coverImage } from "@/lib/optimised-image";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { getBlogPosts } from "@/server/queries/blog";
 
@@ -94,11 +95,7 @@ export default async function BlogPage() {
                 >
                   <div
                     className="journal-cover"
-                    style={
-                      post.images[0]
-                        ? { backgroundImage: `url('${post.images[0]}')` }
-                        : undefined
-                    }
+                    style={coverImage(post.images[0], 828)}
                   />
                   <div className="journal-body">
                     <div className="journal-meta">

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { HERO_IMG } from "@/lib/images";
+import { coverImage } from "@/lib/optimised-image";
 import { MAP_QUERY } from "@/lib/site";
 import { getMenu } from "@/server/queries/catalog";
 
@@ -32,7 +33,7 @@ export default async function ContactPage() {
 
       <section
         className="page-hero"
-        style={{ backgroundImage: `url('${heroImage}')` }}
+        style={coverImage(heroImage, 1920)}
       >
         <div className="inner">
           <span className="eyebrow center">Contact</span>

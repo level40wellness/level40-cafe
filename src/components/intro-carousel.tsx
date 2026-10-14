@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { optimisedImage } from "@/lib/optimised-image";
+
 const AUTO_ADVANCE_MS = 4500;
 /** After a manual swipe, hold off auto-advance so the user's pick stays visible. */
 const INTERACTION_PAUSE_MS = 8000;
@@ -61,7 +63,7 @@ export function IntroCarousel({
         <div
           key={slide.image}
           className={`ic-slide${index === active ? " is-active" : ""}`}
-          style={{ backgroundImage: `url('${slide.image}')` }}
+          style={{ backgroundImage: `url('${optimisedImage(slide.image, 1200)}')` }}
           aria-hidden={index !== active}
         />
       ))}

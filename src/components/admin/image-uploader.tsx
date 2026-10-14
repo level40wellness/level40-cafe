@@ -6,6 +6,8 @@ import { upload } from "@vercel/blob/client";
 import { Star, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
+import { optimiseForUpload, uploadName } from "@/lib/client-image";
+
 export interface DraftImage {
   path: string;
   alt?: string;
@@ -66,10 +68,14 @@ export function ImageUploader({
     try {
       const uploaded = await Promise.all(
         batch.map((file) =>
-          upload(file.name, file, {
-            access: "public",
-            handleUploadUrl: "/api/admin/blob",
-          }),
+          // Shrunk in the browser first: a raw phone photo is 3–7 MB, which
+          // the optimizer would otherwise pull from Blob on every cache miss.
+          optimiseForUpload(file).then((blob) =>
+            upload(uploadName(file.name, blob.type), blob, {
+              access: "public",
+              handleUploadUrl: "/api/admin/blob",
+            }),
+          ),
         ),
       );
 

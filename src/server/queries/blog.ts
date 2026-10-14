@@ -3,6 +3,7 @@ import { and, desc, eq, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { blogPosts } from "@/db/schema";
+import { publicImages } from "@/lib/public-image";
 import { requireAdmin } from "@/server/guards";
 
 const publicColumns = {
@@ -25,7 +26,8 @@ export async function getBlogPosts(limit?: number) {
     .where(eq(blogPosts.active, true))
     .orderBy(desc(blogPosts.publishedAt), desc(blogPosts.createdAt));
 
-  return limit === undefined ? query : query.limit(limit);
+  const rows = await (limit === undefined ? query : query.limit(limit));
+  return rows.map((post) => ({ ...post, images: publicImages(post.images) }));
 }
 
 export type BlogPost = Awaited<ReturnType<typeof getBlogPosts>>[number];
@@ -43,7 +45,7 @@ export async function getBlogPost(slug: string) {
     )
     .limit(1);
 
-  return post ?? null;
+  return post ? { ...post, images: publicImages(post.images) } : null;
 }
 
 /** Everything, including hidden posts, for the admin console. */

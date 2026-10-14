@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { AddToCart } from "@/components/add-to-cart";
 import { formatFils } from "@/lib/format";
+import { coverImage } from "@/lib/optimised-image";
 
 export interface MenuItem {
   id: string;
@@ -62,11 +63,7 @@ export function MenuBrowser({ categories }: { categories: MenuCategory[] }) {
             <article key={item.id} className="m-card reveal in">
               <div
                 className="ph"
-                style={
-                  item.imagePath
-                    ? { backgroundImage: `url('${item.imagePath}')` }
-                    : { backgroundColor: "var(--cream-2)" }
-                }
+                style={coverImage(item.imagePath, 750, { backgroundColor: "var(--cream-2)" })}
               />
               <div className="body">
                 <div className="top">

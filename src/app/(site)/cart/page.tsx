@@ -5,6 +5,7 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 
 import { useCart } from "@/lib/cart";
 import { formatFils } from "@/lib/format";
+import { optimisedImage } from "@/lib/optimised-image";
 
 /**
  * Client-rendered because the cart lives in the browser. Metadata comes from
@@ -91,7 +92,7 @@ export default function CartPage() {
                         height: 68,
                         borderRadius: 10,
                         background: line.imagePath
-                          ? `var(--cream-2) url('${line.imagePath}') center/cover no-repeat`
+                          ? `var(--cream-2) url('${optimisedImage(line.imagePath, 256)}') center/cover no-repeat`
                           : "var(--cream-2)",
                       }}
                     />

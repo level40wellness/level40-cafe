@@ -3,6 +3,14 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     /**
+     * Blob photos are immutable (each upload gets a random suffix), so an
+     * optimised copy can be cached for a long time. The optimizer then fetches
+     * the original from Blob about once a month per size instead of every few
+     * hours — Blob data transfer is the scarce resource on the Hobby plan.
+     */
+    minimumCacheTTL: 2678400, // 31 days
+    qualities: [75],
+    /**
      * Product photos uploaded through the admin console live in Vercel Blob,
      * and next/image refuses any remote host not listed here.
      *

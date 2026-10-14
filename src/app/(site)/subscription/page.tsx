@@ -5,6 +5,7 @@ import { JourneyFlow } from "@/components/journey-flow";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { formatFils } from "@/lib/format";
 import { HERO_IMG } from "@/lib/images";
+import { coverImage } from "@/lib/optimised-image";
 import { getMealPlans } from "@/server/queries/catalog";
 
 export const metadata: Metadata = {
@@ -79,7 +80,7 @@ export default async function SubscriptionPage() {
                       className="tier-img"
                       role="img"
                       aria-label={plan.name}
-                      style={{ backgroundImage: `url('${plan.imageUrl}')` }}
+                      style={coverImage(plan.imageUrl, 750)}
                     />
                   )}
                   {featured && <span className="flag">Signature</span>}

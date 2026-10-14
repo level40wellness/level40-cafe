@@ -6,6 +6,7 @@ import { Minus, Plus, Trash2, X } from "lucide-react";
 
 import { useCart } from "@/lib/cart";
 import { formatFils } from "@/lib/format";
+import { optimisedImage } from "@/lib/optimised-image";
 
 const VAT_RATE_BP = 500;
 
@@ -149,7 +150,7 @@ export function CartDrawer() {
                       height: 60,
                       borderRadius: 10,
                       background: line.imagePath
-                        ? `var(--cream-2) url('${line.imagePath}') center/cover no-repeat`
+                        ? `var(--cream-2) url('${optimisedImage(line.imagePath, 256)}') center/cover no-repeat`
                         : "var(--cream-2)",
                     }}
                   />

@@ -18,7 +18,8 @@
     "db:seed": "tsx --conditions=react-server --env-file-if-exists=.env --env-file-if-exists=.env.local src/db/seed.ts",
     "db:import-catalog": "tsx --conditions=react-server --env-file-if-exists=.env --env-file-if-exists=.env.local src/db/import-catalog.ts",
     "db:seed-menu": "tsx --conditions=react-server --env-file-if-exists=.env --env-file-if-exists=.env.local src/db/seed-menu-photos.ts",
-    "db:migrate-images": "tsx --conditions=react-server --env-file-if-exists=.env --env-file-if-exists=.env.local src/db/migrate-image.ts"
+    "db:migrate-images": "tsx --conditions=react-server --env-file-if-exists=.env --env-file-if-exists=.env.local src/db/migrate-image.ts",
+    "media:mirror": "tsx --conditions=react-server --env-file-if-exists=.env --env-file-if-exists=.env.local src/db/mirror-blob-images.ts"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.6.23",

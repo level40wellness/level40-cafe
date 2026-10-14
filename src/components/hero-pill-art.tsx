@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
 
+import { optimisedImage } from "@/lib/optimised-image";
+
 /** One hero tile: shared by the desktop pill row and the mobile arch deck. */
 export type HeroPill = {
   image: string;
@@ -32,7 +34,7 @@ export function HeroPillArt({
       <div
         className={className}
         style={{
-          backgroundImage: `url('${pill.image}')`,
+          backgroundImage: `url('${optimisedImage(pill.image, 750)}')`,
           backgroundPosition: pill.position ?? "center",
           ...style,
         }}
@@ -44,12 +46,12 @@ export function HeroPillArt({
     <div className={`${className} l40-pill-duo`} style={style}>
       <div
         className="l40-duo-photo l40-duo-b"
-        style={{ backgroundImage: `url('${pill.duo[1]}')` }}
+        style={{ backgroundImage: `url('${optimisedImage(pill.duo[1], 750)}')` }}
       />
       <div className="l40-duo-photo l40-duo-a">
         <div
           className="l40-duo-a-img"
-          style={{ backgroundImage: `url('${pill.duo[0]}')` }}
+          style={{ backgroundImage: `url('${optimisedImage(pill.duo[0], 750)}')` }}
         />
       </div>
       <svg

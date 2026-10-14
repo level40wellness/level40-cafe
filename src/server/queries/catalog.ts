@@ -4,6 +4,7 @@ import { asc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { categories, mealPlans, products } from "@/db/schema";
 import type { ColorOption } from "@/db/schema";
+import { publicImage, publicImages } from "@/lib/public-image";
 
 /**
  * Read side of the data-access layer.
@@ -47,7 +48,9 @@ type ProductRow = typeof products.$inferSelect & {
 };
 
 function toSummary(row: ProductRow): ProductSummary {
-  const sorted = [...row.images].sort((a, b) => a.sortOrder - b.sortOrder);
+  const sorted = publicImages(
+    [...row.images].sort((a, b) => a.sortOrder - b.sortOrder).map((image) => image.path),
+  );
 
   return {
     id: row.id,
@@ -59,8 +62,8 @@ function toSummary(row: ProductRow): ProductSummary {
     inStock: row.inStock,
     sizeOptions: row.sizeOptions,
     colorOptions: row.colorOptions,
-    imagePath: sorted[0]?.path ?? null,
-    images: sorted.map((image) => image.path),
+    imagePath: sorted[0] ?? null,
+    images: sorted,
     categoryName: row.category?.name ?? null,
     categorySlug: row.category?.slug ?? null,
     nutrition: row.nutrition,
@@ -216,5 +219,5 @@ export async function getMealPlans(): Promise<MealPlanSummary[]> {
     // Ordering happens in SQL, so sortOrder need not be selected.
     .orderBy(asc(mealPlans.sortOrder), asc(mealPlans.name));
 
-  return rows;
+  return rows.map((row) => ({ ...row, imageUrl: publicImage(row.imageUrl) }));
 }

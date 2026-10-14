@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
 import { clearCart, useCart } from "@/lib/cart";
 import { formatFils } from "@/lib/format";
+import { coverImage } from "@/lib/optimised-image";
 import { createCheckout } from "@/server/actions/checkout";
 
 /**
@@ -186,11 +187,7 @@ export default function CheckoutPage() {
               <div className="os-item" key={line.id}>
                 <div
                   className="os-thumb"
-                  style={
-                    line.imagePath
-                      ? { backgroundImage: `url('${line.imagePath}')` }
-                      : undefined
-                  }
+                  style={coverImage(line.imagePath, 256)}
                 />
                 <div>
                   <div className="os-name">{line.name}</div>

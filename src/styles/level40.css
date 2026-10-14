@@ -1437,6 +1437,11 @@ section.block {
   height: 230px;
   background: #3b2a1d center/cover no-repeat;
 }
+/* An item without a photo shows the brand mark rather than an empty block. */
+.m-card .ph.ph-logo {
+  background: var(--cream-2) url("/level40-logo.png") center/auto 42% no-repeat;
+  opacity: 0.85;
+}
 .m-card .body {
   padding: 1.7rem 1.6rem;
   display: flex;

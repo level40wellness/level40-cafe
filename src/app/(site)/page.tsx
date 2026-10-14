@@ -135,14 +135,21 @@ export default async function HomePage() {
   // step with the menu and shop; each falls back to a static image if renamed.
   const menuImage = (name: string) =>
     allMenuItems.find((item) => item.name === name)?.imagePath ?? null;
+  // A café slot shows a real menu photo, never a stock dish: the named item
+  // first, else the first item that has a photo (some can be missing, e.g.
+  // while Blob is unavailable), and the static image only if none do.
+  const cafePhoto =
+    menuImage("Cloud") ??
+    menuImage("Cappuccino") ??
+    allMenuItems.find((item) => item.imagePath)?.imagePath ??
+    HERO_IMG.dish1;
   const shopImage = (name: string) =>
     shopProducts.find((product) => product.name === name)?.imagePath ?? null;
   const retailDuo = [shopImage("Astrological"), shopImage("Pink Floral")];
 
   const heroPills: HeroPill[] = [
     {
-      image:
-        menuImage("Cappuccino") ?? allMenuItems[0]?.imagePath ?? HERO_IMG.dish1,
+      image: cafePhoto,
       label: "Healthy Dining & Specialty Coffee",
       href: "/menu",
       tone: "rgba(120, 82, 40, 0.55)",
@@ -273,7 +280,9 @@ export default async function HomePage() {
           tag="One thoughtfully curated destination"
           slides={[
             {
-              image: allMenuItems[0]?.imagePath ?? HERO_IMG.dish1,
+              image:
+                picks.find((item) => item.imagePath !== cafePhoto)?.imagePath ??
+                cafePhoto,
               label: "Healthy Dining",
             },
             { image: "/images/menu/turmeric-latte.jpg", label: "Turmeric Latte" },

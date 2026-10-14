@@ -34,6 +34,11 @@ export function MenuBrowser({ categories }: { categories: MenuCategory[] }) {
     selected === "all"
       ? categories
       : categories.filter((category) => category.id === selected);
+  // Items with a photo lead the grid; the rest (logo placeholder) follow.
+  // Array sort is stable, so menu order is kept within each group.
+  const items = visible
+    .flatMap((category) => category.products)
+    .sort((a, b) => Number(!a.imagePath) - Number(!b.imagePath));
 
   return (
     <>
@@ -58,44 +63,42 @@ export function MenuBrowser({ categories }: { categories: MenuCategory[] }) {
       </div>
 
       <div className="menu-grid">
-        {visible.flatMap((category) =>
-          category.products.map((item) => (
-            <article key={item.id} className="m-card reveal in">
-              <div
-                className="ph"
-                style={coverImage(item.imagePath, 750, { backgroundColor: "var(--cream-2)" })}
-              />
-              <div className="body">
-                <div className="top">
-                  <h3>{item.name}</h3>
-                  <span className="price">{formatFils(item.priceFils)}</span>
-                </div>
-                {item.description && <p className="desc">{item.description}</p>}
-                {item.nutrition && (
-                  <div className="nutri-row">
-                    {item.nutrition
-                      .split(/[,|;•]/)
-                      .map((fact) => fact.trim())
-                      .filter(Boolean)
-                      .map((fact, position) => (
-                        <span key={`${fact}-${position}`} className="nutri-pill">
-                          {fact}
-                        </span>
-                      ))}
-                  </div>
-                )}
-                <div className="foot">
-                  <AddToCart
-                    productId={item.id}
-                    name={item.name}
-                    priceFils={item.priceFils}
-                    imagePath={item.imagePath}
-                  />
-                </div>
+        {items.map((item) => (
+          <article key={item.id} className="m-card reveal in">
+            <div
+              className={item.imagePath ? "ph" : "ph ph-logo"}
+              style={coverImage(item.imagePath, 750)}
+            />
+            <div className="body">
+              <div className="top">
+                <h3>{item.name}</h3>
+                <span className="price">{formatFils(item.priceFils)}</span>
               </div>
-            </article>
-          )),
-        )}
+              {item.description && <p className="desc">{item.description}</p>}
+              {item.nutrition && (
+                <div className="nutri-row">
+                  {item.nutrition
+                    .split(/[,|;•]/)
+                    .map((fact) => fact.trim())
+                    .filter(Boolean)
+                    .map((fact, position) => (
+                      <span key={`${fact}-${position}`} className="nutri-pill">
+                        {fact}
+                      </span>
+                    ))}
+                </div>
+              )}
+              <div className="foot">
+                <AddToCart
+                  productId={item.id}
+                  name={item.name}
+                  priceFils={item.priceFils}
+                  imagePath={item.imagePath}
+                />
+              </div>
+            </div>
+          </article>
+        ))}
       </div>
     </>
   );

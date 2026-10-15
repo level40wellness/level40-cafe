@@ -38,9 +38,7 @@ export function MenuBrowser({ categories }: { categories: MenuCategory[] }) {
   // Array sort is stable, so menu order is kept within each group.
   const items = visible
     .flatMap((category) => category.products)
-    .sort((a, b) => Number(!a.imagePath) - Number(!b.imagePath));
-
-  console.log("MenuBrowser", { items });  
+    .sort((a, b) => Number(!a.imagePath) - Number(!b.imagePath));  
 
   return (
     <>

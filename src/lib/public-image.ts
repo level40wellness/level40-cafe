@@ -13,7 +13,7 @@ import mirror from "./blob-mirror.json";
  * Once the store is back, set BLOB_BLOCKED to false. Mirrored photos can stay:
  * they are smaller, and serving them locally saves Blob transfer.
  */
-const BLOB_BLOCKED = true;
+const BLOB_BLOCKED = false;
 const BLOB_HOST = ".public.blob.vercel-storage.com";
 const MIRROR: Record<string, string> = mirror;
 

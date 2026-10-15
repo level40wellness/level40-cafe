@@ -40,6 +40,8 @@ export function MenuBrowser({ categories }: { categories: MenuCategory[] }) {
     .flatMap((category) => category.products)
     .sort((a, b) => Number(!a.imagePath) - Number(!b.imagePath));
 
+  console.log("MenuBrowser", { items });  
+
   return (
     <>
       <div className="filters">
